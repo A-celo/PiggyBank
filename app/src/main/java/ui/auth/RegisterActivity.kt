@@ -54,6 +54,30 @@ class RegisterActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
+        btnRegister.setOnClickListener {
+            showConfirmationDialog()
+        }
+
     }
+
+    private fun showConfirmationDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_confirmation, null)
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        // Botón Ok
+        dialogView.findViewById<Button>(R.id.btnOk).setOnClickListener {
+            dialog.dismiss()
+            val intent = Intent(this, SignInActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+        dialog.show()
+    }
+
 }
 
