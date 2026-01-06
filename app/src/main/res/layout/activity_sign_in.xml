@@ -13,7 +13,7 @@
         android:id="@+id/logoPiggyBank"
         android:layout_width="304dp"
         android:layout_height="429dp"
-        android:src="@drawable/logopiggy"
+        android:src="@drawable/piggylogo"
         android:contentDescription="Logo Piggy Bank"
         android:scaleType="centerCrop"
         android:background="#D3D3D3"

@@ -202,20 +202,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Home -->
+        <!-- Home -->
         <LinearLayout
+            android:id="@+id/menuHome"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center">
             <ImageView
+                android:id="@+id/iconHome"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_home"
-                app:tint="#6750A4" />
+                app:tint="#6750A4"/>
             <TextView
-                android:id="@+id/menuHome"
+                android:id="@+id/textHome"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Home"
@@ -226,18 +228,20 @@
 
         <!-- Add -->
         <LinearLayout
+            android:id="@+id/menuAdd"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center">
             <ImageView
+                android:id="@+id/iconAdd"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_plus"
-                app:tint="#C7B8EA" />
+                app:tint="#C7B8EA"/>
             <TextView
-                android:id="@+id/menuAdd"
+                android:id="@+id/textAdd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Add"
@@ -248,18 +252,20 @@
 
         <!-- Insights -->
         <LinearLayout
+            android:id="@+id/menuInsights"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center">
             <ImageView
+                android:id="@+id/iconInsights"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_insights"
-                app:tint="#C7B8EA" />
+                app:tint="#C7B8EA"/>
             <TextView
-                android:id="@+id/menuInsights"
+                android:id="@+id/textInsights"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Insights"
@@ -270,18 +276,20 @@
 
         <!-- Goals -->
         <LinearLayout
+            android:id="@+id/menuGoals"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center">
             <ImageView
+                android:id="@+id/iconGoals"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_goals"
-                app:tint="#C7B8EA" />
+                app:tint="#C7B8EA"/>
             <TextView
-                android:id="@+id/menuGoals"
+                android:id="@+id/textGoals"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Goals"
@@ -292,18 +300,20 @@
 
         <!-- Profile -->
         <LinearLayout
+            android:id="@+id/menuProfile"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center">
             <ImageView
+                android:id="@+id/iconProfile"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_profile"
-                app:tint="#C7B8EA" />
+                app:tint="#C7B8EA"/>
             <TextView
-                android:id="@+id/menuProfile"
+                android:id="@+id/textProfile"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Profile"
@@ -313,5 +323,6 @@
         </LinearLayout>
 
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
