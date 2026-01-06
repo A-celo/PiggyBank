@@ -9,20 +9,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PiggyBank">
-
-        <!-- PANTALLAS DE LA APP -->
-        <activity android:name=".ui.home.HomeActivity" />
+        <activity
+            android:name="ui.home.InsightsActivity"
+            android:exported="false" />
+        <!-- Home y AddExpense -->
+        <activity
+            android:name=".ui.home.AddExpenseActivity"
+            android:exported="false" />
+        <activity android:name=".ui.home.HomeActivity" /> <!-- Auth -->
         <activity android:name=".ui.auth.ForgotPasswordActivity" />
         <activity android:name=".ui.auth.RegisterActivity" />
-
-        <!-- PANTALLA DE INICIO -->
-        <activity android:name=".ui.auth.SignInActivity" android:exported="true">
+        <activity
+            android:name=".ui.auth.SignInActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
 
 </manifest>

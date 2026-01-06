@@ -6,6 +6,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.piggybank.R
+import android.content.Intent
+
 
 class HomeActivity : AppCompatActivity() {
 
@@ -27,6 +29,10 @@ class HomeActivity : AppCompatActivity() {
 
         // ---------- Botón Add Expense ----------
         val btnAddExpense = findViewById<Button>(R.id.btnAddExpense)
+        btnAddExpense.setOnClickListener {
+            val intent = Intent(this, AddExpenseActivity::class.java)
+            startActivity(intent)
+        }
 
         // ---------- Bottom Menu  ----------
         val menuHome = findViewById<LinearLayout>(R.id.menuHome)
@@ -34,7 +40,21 @@ class HomeActivity : AppCompatActivity() {
         val menuInsights = findViewById<LinearLayout>(R.id.menuInsights)
         val menuGoals = findViewById<LinearLayout>(R.id.menuGoals)
         val menuProfile = findViewById<LinearLayout>(R.id.menuProfile)
+
+        // Listener para que el menú "Add" abra AddExpenseActivity
+        menuAdd.setOnClickListener {
+            val intent = Intent(this, AddExpenseActivity::class.java)
+            startActivity(intent)
+        }
     }
+
+
 }
+
+
+
+
+
+
 
 
