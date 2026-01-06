@@ -1,21 +1,38 @@
-package ui.home
+package com.example.piggybank.ui.home
 
+import android.graphics.Color
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.example.piggybank.R
 
 class InsightsActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_insights)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+
+        val weekly = findViewById<TextView>(R.id.tvWeekly)
+        val monthly = findViewById<TextView>(R.id.tvMonthly)
+        val yearly = findViewById<TextView>(R.id.tvYearly)
+
+        fun select(selected: TextView) {
+            listOf(weekly, monthly, yearly).forEach {
+                it.setBackgroundResource(R.drawable.toggle_unselected)
+                it.setTextColor(Color.parseColor("#9E9E9E"))
+            }
+            selected.setBackgroundResource(R.drawable.toggle_selected)
+            selected.setTextColor(Color.WHITE)
         }
+
+        weekly.setOnClickListener { select(weekly) }
+        monthly.setOnClickListener { select(monthly) }
+        yearly.setOnClickListener { select(yearly) }
+
+        select(weekly)
+
+        BottomMenuHelper.setupMenu(this, "insights")
     }
 }
+
+

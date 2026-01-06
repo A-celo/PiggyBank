@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.piggybank">
+    package="com.example.piggybank" >
 
     <application
         android:allowBackup="true"
@@ -8,26 +8,20 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.PiggyBank">
-        <activity
-            android:name="ui.home.InsightsActivity"
-            android:exported="false" />
-        <!-- Home y AddExpense -->
-        <activity
-            android:name=".ui.home.AddExpenseActivity"
-            android:exported="false" />
-        <activity android:name=".ui.home.HomeActivity" /> <!-- Auth -->
-        <activity android:name=".ui.auth.ForgotPasswordActivity" />
-        <activity android:name=".ui.auth.RegisterActivity" />
+        android:theme="@style/Theme.PiggyBank" >
         <activity
             android:name=".ui.auth.SignInActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".ui.home.HomeActivity" />
+        <activity android:name=".ui.home.InsightsActivity" />
+        <activity android:name=".ui.home.AddExpenseActivity" />
+
     </application>
 
 </manifest>
