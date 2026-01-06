@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialogError"
+    android:layout_width="337dp"
+    android:layout_height="349dp"
+    android:clipToOutline="true"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <!-- Círculo rojo con ✓ como icono de error -->
+    <TextView
+        android:id="@+id/x_circle"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_marginTop="31dp"
+        android:layout_centerHorizontal="true"
+        android:background="#9B0D0D"
+        android:text="!"
+        android:textColor="#FFFFFF"
+        android:textSize="48sp"
+        android:gravity="center"
+        android:clipToOutline="true"
+        android:letterSpacing="0.05"/>
+
+    <!-- Mensaje principal -->
+    <TextView
+        android:id="@+id/there_was_a"
+        android:layout_width="309dp"
+        android:layout_height="80dp"
+        android:layout_below="@id/x_circle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="There was a \nmistake!"
+        android:textColor="#757575"
+        android:textSize="40sp"
+        android:letterSpacing="0.03"
+        android:lineSpacingExtra="-8sp"
+        android:gravity="center"/>
+
+    <!-- Mensaje secundario -->
+    <TextView
+        android:id="@+id/try_to_regi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/there_was_a"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="Try to register again to start\nsaving!"
+        android:textColor="#757575"
+        android:textSize="20sp"
+        android:letterSpacing="0.05"
+        android:lineSpacingExtra="-4sp"/>
+
+    <!-- Botón Ok -->
+    <Button
+        android:id="@+id/btnOkError"
+        android:layout_width="119dp"
+        android:layout_height="47dp"
+        android:layout_below="@id/try_to_regi"
+        android:layout_marginTop="20dp"
+        android:layout_centerHorizontal="true"
+        android:backgroundTint="#9B0D0D"
+        android:text="Ok"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp"/>
+</RelativeLayout>

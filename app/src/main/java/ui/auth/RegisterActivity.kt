@@ -28,8 +28,27 @@ class RegisterActivity : AppCompatActivity() {
         // ---------- Botón Register ----------
         val btnRegister = findViewById<Button>(R.id.btnRegister)
         btnRegister.setOnClickListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
+            val hasError = true // solo ejemplo, aquí va la lógica real de validación
+
+            if (hasError) {
+                val dialogView = layoutInflater.inflate(R.layout.dialog_error, null)
+                val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOkError)
+                btnOk.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                dialog.show()
+            } else {
+                // Si todo ok, ir a HomeActivity
+                val intent = Intent(this, HomeActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
         }
 
         // ---------- Texto "Already have an account? Sign In" ----------
