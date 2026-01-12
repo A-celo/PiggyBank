@@ -22,8 +22,14 @@ class RegisterActivity : AppCompatActivity() {
         // ---------- Botón de volver atrás ----------
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
         btnBack.setOnClickListener {
-            finish()
+            //finish()
+            //setContentView(R.layout.activity_sign_in)
         }
+
+        //back button when registering - botón de regresar cuando te registras
+        /*findViewById<ImageButton>(R.id.btnBack).setOnClickListener {
+            setContentView(R.layout.activity_sign_in)
+        }*/
 
         // ---------- Botón Register ----------
         val btnRegister = findViewById<Button>(R.id.btnRegister)
@@ -72,6 +78,7 @@ class RegisterActivity : AppCompatActivity() {
             val intent = Intent(this, SignInActivity::class.java)
             startActivity(intent)
             finish()
+            //setContentView(R.layout.activity_sign_in)
         }
 
         btnRegister.setOnClickListener {
