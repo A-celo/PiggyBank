@@ -112,8 +112,9 @@ class SignInActivity : AppCompatActivity() {
         )
         tvRegister.text = spannable
 
-        tvRegister.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+        //register button - botón de registro
+        findViewById<TextView>(R.id.tvRegister).setOnClickListener {
+            setContentView(R.layout.activity_register)
         }
 
         // ---------- "I forgot my password" ----------
