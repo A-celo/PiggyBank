@@ -44,7 +44,7 @@ class SignInActivity : AppCompatActivity() {
 
             // Validaciones
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Por favor, completa todos los campos", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please, complete all requested fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -64,14 +64,14 @@ class SignInActivity : AppCompatActivity() {
                         val user = auth.currentUser
 
                         // Verificar si el email está verificado (opcional)
-                        if (user?.isEmailVerified == false) {
+                        /*if (user?.isEmailVerified == false) {
                             // Puedes pedir verificación o permitir acceso igual
                             Toast.makeText(
                                 this,
                                 "Inicio de sesión exitoso. Verifica tu email para acceder a todas las funciones.",
                                 Toast.LENGTH_LONG
                             ).show()
-                        }
+                        }*/
 
                         // Ir a HomeActivity
                         startActivity(Intent(this, HomeActivity::class.java))
@@ -81,15 +81,15 @@ class SignInActivity : AppCompatActivity() {
                         // Error en login
                         val errorMessage = when {
                             task.exception?.message?.contains("network") == true ->
-                                "Error de conexión. Verifica tu internet."
+                                "Connection Error. Verify your internet."
                             task.exception?.message?.contains("invalid credential") == true ->
-                                "Email o contraseña incorrectos"
+                                "Incorrect Email or password"
                             task.exception?.message?.contains("user-not-found") == true ->
-                                "Usuario no encontrado. Regístrate primero."
+                                "User not found. Sign in first."
                             task.exception?.message?.contains("too-many-requests") == true ->
-                                "Demasiados intentos. Intenta más tarde."
+                                "Too many failed requests. Try again later."
                             else ->
-                                "Error: ${task.exception?.message ?: "Error desconocido"}"
+                                "Error: ${task.exception?.message ?: "Unknown Error"}"
                         }
 
                         Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
