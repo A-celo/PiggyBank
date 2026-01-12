@@ -15,6 +15,9 @@ plugins {
         implementation("com.google.firebase:firebase-auth")
         implementation("com.google.firebase:firebase-firestore")
 
+        // Material Components (para los campos y botones bonitos)
+        implementation("com.google.android.material:material:1.11.0")
+
     }
 
 android {
