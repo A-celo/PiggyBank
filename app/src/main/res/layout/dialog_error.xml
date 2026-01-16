@@ -40,7 +40,7 @@
 
     <!-- Mensaje secundario -->
     <TextView
-        android:id="@+id/try_to_regi"
+        android:id="@+id/tvErrorMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/there_was_a"
@@ -57,11 +57,12 @@
         android:id="@+id/btnOkError"
         android:layout_width="119dp"
         android:layout_height="47dp"
-        android:layout_below="@id/try_to_regi"
+        android:layout_below="@id/tvErrorMessage"
         android:layout_marginTop="20dp"
         android:layout_centerHorizontal="true"
         android:backgroundTint="#9B0D0D"
         android:text="Ok"
         android:textColor="#FFFFFF"
         android:textSize="18sp"/>
+
 </RelativeLayout>

@@ -7,6 +7,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -22,7 +23,7 @@ class RegisterActivity : AppCompatActivity() {
         // ---------- Botón de volver atrás ----------
         val btnBack = findViewById<ImageButton>(R.id.btnBack)
         btnBack.setOnClickListener {
-            //finish()
+            finish()
             //setContentView(R.layout.activity_sign_in)
         }
 
@@ -34,26 +35,20 @@ class RegisterActivity : AppCompatActivity() {
         // ---------- Botón Register ----------
         val btnRegister = findViewById<Button>(R.id.btnRegister)
         btnRegister.setOnClickListener {
-            val hasError = true // solo ejemplo, aquí va la lógica real de validación
 
-            if (hasError) {
-                val dialogView = layoutInflater.inflate(R.layout.dialog_error, null)
-                val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setView(dialogView)
-                    .setCancelable(false)
-                    .create()
+            // logica de validacion
+            val email = findViewById<EditText>(R.id.etEmail).text.toString().trim()
+            val password = findViewById<EditText>(R.id.etPassword).text.toString().trim()
+            val confirmPassword = findViewById<EditText>(R.id.etConfirmPassword).text.toString().trim()
 
-                val btnOk = dialogView.findViewById<Button>(R.id.btnOkError)
-                btnOk.setOnClickListener {
-                    dialog.dismiss()
-                }
-
-                dialog.show()
+            if (email.isEmpty()) {
+                showErrorDialog("Email cannot be empty")
+            } else if (password.length < 6) {
+                showErrorDialog("Password must be at least 6 characters")
+            } else if (password != confirmPassword) {
+                showErrorDialog("Passwords do not match")
             } else {
-                // Si todo ok, ir a HomeActivity
-                val intent = Intent(this, HomeActivity::class.java)
-                startActivity(intent)
-                finish()
+                showConfirmationDialog()
             }
         }
 
@@ -81,10 +76,9 @@ class RegisterActivity : AppCompatActivity() {
             //setContentView(R.layout.activity_sign_in)
         }
 
-        btnRegister.setOnClickListener {
-            showConfirmationDialog()
-        }
-
+        //btnRegister.setOnClickListener {
+        //    showConfirmationDialog()
+        //}
     }
 
     private fun showConfirmationDialog() {
@@ -105,5 +99,21 @@ class RegisterActivity : AppCompatActivity() {
         dialog.show()
     }
 
-}
+    // mostramos mensajes de error más especificos
+    private fun showErrorDialog(message: String) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_error, null)
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
 
+        val tvMessage = dialogView.findViewById<TextView>(R.id.tvErrorMessage)
+        tvMessage.text = message
+
+        dialogView.findViewById<Button>(R.id.btnOkError).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+}

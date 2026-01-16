@@ -114,7 +114,7 @@ class SignInActivity : AppCompatActivity() {
 
         //register button - botón de registro
         findViewById<TextView>(R.id.tvRegister).setOnClickListener {
-            setContentView(R.layout.activity_register)
+            startActivity(Intent(this, RegisterActivity::class.java)) // cambio esto para navegar entre pantallas
         }
 
         // ---------- "I forgot my password" ----------
