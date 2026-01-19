@@ -102,7 +102,7 @@
             android:textColorHint="#757575"/>
 
         <FrameLayout
-            android:id="@+id/btnMicContainer"
+            android:id="@+id/btnArrowForward"
             android:layout_width="49dp"
             android:layout_height="match_parent"
             android:layout_gravity="end"
