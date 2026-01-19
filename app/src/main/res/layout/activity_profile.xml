@@ -84,14 +84,18 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- ================= PROFILE PHOTO ================= -->
-            <View
-                android:id="@+id/generic_ava"
+            <!-- ================= PROFILE PHOTO - ahora es imageview ================= -->
+            <ImageView
+                android:id="@+id/ivProfilePhoto"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_marginTop="32dp"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/generic_ava"/>
+                android:background="@drawable/generic_ava"
+                android:scaleType="centerCrop"
+                android:contentDescription="Profile photo"
+                android:clickable="true"
+                android:focusable="true" />
 
             <!-- ================= NAME FIELD ================= -->
             <TextView
