@@ -95,7 +95,11 @@ object BottomMenuHelper {
         }
 
         menuProfile?.setOnClickListener {
-            // activity.startActivity(Intent(activity, ProfileActivity::class.java))
+            if (activity !is ProfileActivity) {
+                val intent = Intent(activity, ProfileActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+            }
         }
     }
 }
