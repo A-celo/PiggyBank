@@ -14,6 +14,7 @@ plugins {
         implementation("com.google.firebase:firebase-analytics")
         implementation("com.google.firebase:firebase-auth")
         implementation("com.google.firebase:firebase-firestore")
+        implementation("androidx.recyclerview:recyclerview:1.3.2")
 
         // Material Components (para los campos y botones bonitos)
         implementation("com.google.android.material:material:1.11.0")

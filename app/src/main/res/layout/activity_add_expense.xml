@@ -134,6 +134,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- Total Expenses Text -->
+    <TextView
+        android:id="@+id/tvTotalExpenses"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total: $0.00"
+        android:textSize="18sp"
+        android:textColor="#666666"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/btnAddExpense"
+        app:layout_constraintStart_toStartOf="@id/inputContainer"/>
+
     <!-- Expenses -->
 
     <TextView
@@ -144,9 +156,9 @@
         android:textSize="32sp"
         android:textColor="#4C4C4C"
         android:textStyle="bold"
-        android:layout_marginTop="24dp"
-        app:layout_constraintStart_toStartOf="@id/inputContainer"
-        app:layout_constraintTop_toBottomOf="@id/btnAddExpense"/>
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tvTotalExpenses"
+        app:layout_constraintStart_toStartOf="@id/inputContainer"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvExpenses"
