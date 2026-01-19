@@ -102,7 +102,7 @@ class AddExpenseActivity : AppCompatActivity() {
 
         // Inicializar vistas - AÑADIR EL TOTAL EXPENSES SI NO EXISTE
         rvExpenses = findViewById(R.id.rvExpenses)
-        btnAddExpenseOverlay = findViewById(R.id.btnArrowForward)
+        btnAddExpenseOverlay = findViewById(R.id.btnAddExpense)
 
         // Buscar o crear tvTotalExpenses
         tvTotalExpenses = findViewById(R.id.tvTotalExpenses)
