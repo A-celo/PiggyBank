@@ -2,11 +2,13 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/dialogConfirmation"
-    android:layout_width="337dp"
-    android:layout_height="349dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
     android:clipToOutline="true"
     android:background="#C7B8EA"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:gravity="center">
 
     <!-- Icono check -->
     <ImageView

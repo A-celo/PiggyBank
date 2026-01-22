@@ -67,12 +67,16 @@ object BottomMenuHelper {
                 val intent = Intent(activity, HomeActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 activity.startActivity(intent)
+                activity.finish()
             }
         }
 
         menuAdd?.setOnClickListener {
             if (activity !is AddExpenseActivity) {
-                activity.startActivity(Intent(activity, AddExpenseActivity::class.java))
+                val intent = Intent(activity, AddExpenseActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+                activity.finish()
             }
         }
 
@@ -81,6 +85,7 @@ object BottomMenuHelper {
                 val intent = Intent(activity, InsightsActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 activity.startActivity(intent)
+                activity.finish()
             }
         }
 
@@ -90,10 +95,11 @@ object BottomMenuHelper {
         }
 
         menuProfile?.setOnClickListener {
-            // activity.startActivity(Intent(activity, ProfileActivity::class.java))
+            if (activity !is ProfileActivity) {
+                val intent = Intent(activity, ProfileActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+            }
         }
     }
 }
-
-
-
