@@ -89,9 +89,13 @@ object BottomMenuHelper {
             }
         }
 
-        // TODO: Agregar navegación para Goals y Profile cuando crees esas Activities
         menuGoals?.setOnClickListener {
-            // activity.startActivity(Intent(activity, GoalsActivity::class.java))
+            if (activity !is GoalsActivity) {
+                val intent = Intent(activity, GoalsActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+                activity.finish()
+            }
         }
 
         menuProfile?.setOnClickListener {
