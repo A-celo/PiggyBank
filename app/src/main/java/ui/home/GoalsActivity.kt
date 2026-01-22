@@ -1,0 +1,80 @@
+package com.example.piggybank.ui.home
+
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.piggybank.R
+import com.google.android.material.button.MaterialButton
+import com.google.firebase.firestore.FirebaseFirestore
+import com.example.piggybank.model.Goal
+
+class GoalsActivity : AppCompatActivity() {
+
+    private lateinit var rvGoals: RecyclerView
+    private lateinit var btnCreateGoal: MaterialButton
+    private val goalsList = mutableListOf<Goal>()
+    private lateinit var goalAdapter: GoalAdapter
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_goals)
+
+        // PRIMERO: Inicializar TODAS las vistas
+        rvGoals = findViewById(R.id.rvGoals)
+        btnCreateGoal = findViewById(R.id.btnCreateGoal)
+
+        // SEGUNDO: Configurar el adapter
+        goalAdapter = GoalAdapter(goalsList) { loadGoalsFromFirebase() }
+        rvGoals.adapter = goalAdapter
+        rvGoals.layoutManager = LinearLayoutManager(this)
+
+        // TERCERO: Configurar listeners
+        btnCreateGoal.setOnClickListener {
+            val dialog = CreateGoalDialog()
+            dialog.onGoalSaved = { loadGoalsFromFirebase() }
+            dialog.show(supportFragmentManager, "CreateGoalDialog")
+        }
+
+        // CUARTO: Configurar window insets
+        val content = findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.contentContainer)
+        ViewCompat.setOnApplyWindowInsetsListener(content) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, 0, 0, systemBars.bottom)
+            insets
+        }
+
+        // QUINTO: Configurar el menú (DESPUÉS de inicializar las vistas)
+        BottomMenuHelper.setupMenu(this, "goals")
+
+        // SEXTO: Cargar datos
+        loadGoalsFromFirebase()
+    }
+
+    private fun loadGoalsFromFirebase() {
+        val db = FirebaseFirestore.getInstance()
+        db.collection("goals")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                goalsList.clear()
+                for (doc in snapshot.documents) {
+                    val goal = doc.toObject(Goal::class.java)
+                    goal?.id = doc.id
+                    if (goal != null) goalsList.add(goal)
+                }
+                goalAdapter.notifyDataSetChanged()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Error loading goals: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+    }
+}
+
+
+
+

@@ -10,9 +10,8 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PiggyBank">
         <activity
-            android:name="ui.home.ProfileActivity"
+            android:name="ui.home.CreateGoalDialog"
             android:exported="false" />
-        <!-- LOGIN (pantalla inicial) -->
         <activity
             android:name=".ui.auth.SignInActivity"
             android:exported="true">
@@ -40,7 +39,9 @@
         <activity
             android:name=".ui.home.ProfileActivity"
             android:exported="false" />
-
+        <activity
+            android:name=".ui.home.GoalsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
