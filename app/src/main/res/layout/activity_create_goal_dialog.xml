@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="0dp">
+
+    <!-- Fondo principal del pop-up -->
+    <RelativeLayout
+        android:id="@+id/createnewgo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clipToOutline="true"
+        android:background="@drawable/createnewgo"
+        android:padding="24dp">
+
+        <!-- Título -->
+        <TextView
+            android:id="@+id/tvDialogTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Create a new goal"
+            android:textSize="28sp"
+            android:textColor="#4C4C4C"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Goal Name -->
+        <EditText
+            android:id="@+id/etGoalName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Goal Name"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"
+            android:layout_below="@id/tvDialogTitle"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Category Spinner -->
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/etGoalName"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Target Amount -->
+        <EditText
+            android:id="@+id/etTargetAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Target Amount"
+            android:inputType="numberDecimal"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"
+            android:layout_below="@id/spinnerCategory"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Completion Date -->
+        <EditText
+            android:id="@+id/etCompletionDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Completion Date"
+            android:focusable="false"
+            android:clickable="true"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"
+            android:layout_below="@id/etTargetAmount"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Botones -->
+        <LinearLayout
+            android:id="@+id/buttonsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@id/etCompletionDate"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"/>
+
+            <Button
+                android:id="@+id/btnSave"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Save"
+                android:layout_marginStart="12dp"/>
+        </LinearLayout>
+
+    </RelativeLayout>
+</ScrollView>

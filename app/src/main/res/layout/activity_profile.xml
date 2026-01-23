@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F5F5"
+    tools:context=".ui.home.ProfileActivity">
+
+    <!-- ================= HEADER ================= -->
+    <View
+        android:id="@+id/headerBackground"
+        android:layout_width="0dp"
+        android:layout_height="115dp"
+        android:background="#C7B8EA"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <ImageView
+        android:id="@+id/logoPig"
+        android:layout_width="75dp"
+        android:layout_height="106dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="9dp"
+        android:src="@drawable/logopiggyhome"
+        android:scaleType="fitCenter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Piggy Bank"
+        android:textSize="40sp"
+        android:textColor="#F5F5F5"
+        android:textStyle="bold"
+        android:layout_marginEnd="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/headerBackground"
+        app:layout_constraintBottom_toBottomOf="@id/headerBackground"/>
+
+    <!-- ================= BACK + TITLE ================= -->
+    <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/arrow_back_black"
+        android:contentDescription="Back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/headerBackground"/>
+
+    <TextView
+        android:id="@+id/tvProfileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Profile"
+        android:textSize="32sp"
+        android:textColor="#4C4C4C"
+        android:textStyle="bold"
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack"/>
+
+    <!-- ================= SCROLLABLE CONTENT ================= -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollContent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        app:layout_constraintBottom_toTopOf="@id/bottomMenu"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+
+            <!-- ================= PROFILE PHOTO - ahora es imageview ================= -->
+            <ImageView
+                android:id="@+id/ivProfilePhoto"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginTop="32dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/generic_ava"
+                android:scaleType="centerCrop"
+                android:contentDescription="Profile photo"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <!-- ================= NAME FIELD ================= -->
+            <TextView
+                android:id="@+id/tvNameLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name"
+                android:textSize="16sp"
+                android:letterSpacing="0.02"
+                android:textColor="#757575"
+                android:layout_marginStart="46dp"
+                android:layout_marginTop="32dp"/>
+
+            <LinearLayout
+                android:id="@+id/nameContainer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginStart="39dp"
+                android:layout_marginEnd="39dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvNameValue"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="Maria Wozniak"
+                    android:textSize="20sp"
+                    android:textColor="#767676"
+                    android:letterSpacing="0.02"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/profile_field_background"/>
+
+                <FrameLayout
+                    android:id="@+id/btnEditName"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/edit_button_background">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/edit"
+                        app:tint="#FFFFFF"/>
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- ================= EMAIL FIELD ================= -->
+            <TextView
+                android:id="@+id/tvEmailLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="E-mail"
+                android:textSize="16sp"
+                android:letterSpacing="0.02"
+                android:textColor="#757575"
+                android:layout_marginStart="46dp"
+                android:layout_marginTop="24dp"/>
+
+            <LinearLayout
+                android:id="@+id/emailContainer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginStart="39dp"
+                android:layout_marginEnd="39dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvEmailValue"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="maria.wozniak@email.com"
+                    android:textSize="20sp"
+                    android:textColor="#767676"
+                    android:letterSpacing="0.02"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/profile_field_background"/>
+
+                <FrameLayout
+                    android:id="@+id/btnEditEmail"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/edit_button_background">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/edit"
+                        app:tint="#FFFFFF"/>
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- ================= PASSWORD FIELD ================= -->
+            <TextView
+                android:id="@+id/tvPasswordLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Password"
+                android:textSize="16sp"
+                android:letterSpacing="0.02"
+                android:textColor="#757575"
+                android:layout_marginStart="46dp"
+                android:layout_marginTop="24dp"/>
+
+            <LinearLayout
+                android:id="@+id/passwordContainer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginStart="39dp"
+                android:layout_marginEnd="39dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvPasswordValue"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="••••••••"
+                    android:textSize="20sp"
+                    android:textColor="#767676"
+                    android:letterSpacing="0.02"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/profile_field_background"/>
+
+                <FrameLayout
+                    android:id="@+id/btnEditPassword"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/edit_button_background">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/edit"
+                        app:tint="#FFFFFF"/>
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- ================= CURRENCY FIELD ================= -->
+            <TextView
+                android:id="@+id/tvCurrencyLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Currency"
+                android:textSize="16sp"
+                android:letterSpacing="0.02"
+                android:textColor="#757575"
+                android:layout_marginStart="46dp"
+                android:layout_marginTop="24dp"/>
+
+            <LinearLayout
+                android:id="@+id/currencyContainer"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginStart="39dp"
+                android:layout_marginEnd="39dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tvCurrencyValue"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="USD"
+                    android:textSize="20sp"
+                    android:textColor="#767676"
+                    android:letterSpacing="0.02"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:background="@drawable/profile_field_background"/>
+
+                <FrameLayout
+                    android:id="@+id/btnEditCurrency"
+                    android:layout_width="55dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="2dp"
+                    android:background="@drawable/edit_button_background">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/keyboard_arrow_down"
+                        app:tint="#FFFFFF"/>
+                </FrameLayout>
+            </LinearLayout>
+
+            <!-- ================= LOGOUT BUTTON ================= -->
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="302dp"
+                android:layout_height="57dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="32dp"
+                android:text="Log Out"
+                android:textSize="18sp"
+                android:textColor="#FFFFFF"
+                android:textAllCaps="false"
+                android:letterSpacing="0.02"
+                android:background="@drawable/button_background"/>
+
+            <!-- ================= DELETE ACCOUNT ================= -->
+            <TextView
+                android:id="@+id/btnDeleteAccount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Delete account"
+                android:textSize="16sp"
+                android:textColor="#9B0D0D"
+                android:letterSpacing="0.02"
+                android:layout_marginTop="16dp"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- ================= BOTTOM NAVIGATION ================= -->
+    <LinearLayout
+        android:id="@+id/bottomMenu"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:gravity="center"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Home -->
+        <LinearLayout
+            android:id="@+id/menuHome"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/iconHome"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_home"
+                app:tint="#C7B8EA"/>
+            <TextView
+                android:id="@+id/textHome"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Home"
+                android:textSize="14sp"
+                android:textColor="#C7B8EA"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Add -->
+        <LinearLayout
+            android:id="@+id/menuAdd"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/iconAdd"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_plus"
+                app:tint="#C7B8EA"/>
+            <TextView
+                android:id="@+id/textAdd"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add"
+                android:textSize="14sp"
+                android:textColor="#C7B8EA"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Insights -->
+        <LinearLayout
+            android:id="@+id/menuInsights"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/iconInsights"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_insights"
+                app:tint="#C7B8EA"/>
+            <TextView
+                android:id="@+id/textInsights"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Insights"
+                android:textSize="14sp"
+                android:textColor="#C7B8EA"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Goals -->
+        <LinearLayout
+            android:id="@+id/menuGoals"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/iconGoals"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_goals"
+                app:tint="#C7B8EA"/>
+            <TextView
+                android:id="@+id/textGoals"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Goals"
+                android:textSize="14sp"
+                android:textColor="#C7B8EA"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+        <!-- Profile -->
+        <LinearLayout
+            android:id="@+id/menuProfile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/iconProfile"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_profile"
+                app:tint="#6750A4"/>
+            <TextView
+                android:id="@+id/textProfile"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Profile"
+                android:textSize="14sp"
+                android:textColor="#6750A4"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

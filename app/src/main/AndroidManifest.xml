@@ -9,49 +9,39 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PiggyBank">
-
-        <!-- LOGIN (pantalla inicial) -->
+        <activity
+            android:name="ui.home.CreateGoalDialog"
+            android:exported="false" />
         <activity
             android:name=".ui.auth.SignInActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- REGISTER -->
+        </activity> <!-- REGISTER -->
         <activity
             android:name=".ui.auth.RegisterActivity"
-            android:exported="false" />
-
-        <!-- FORGOT PASSWORD-->
+            android:exported="false" /> <!-- FORGOT PASSWORD -->
         <activity
             android:name=".ui.auth.ForgotPasswordActivity"
-            android:exported="false" />
-
-        <!-- HOME -->
+            android:exported="false" /> <!-- HOME -->
         <activity
             android:name=".ui.home.HomeActivity"
-            android:exported="false" />
-
-        <!-- ADD EXPENSE -->
+            android:exported="false" /> <!-- ADD EXPENSE -->
         <activity
             android:name=".ui.home.AddExpenseActivity"
-            android:exported="false" />
-
-        <!-- INSIGHTS -->
+            android:exported="false" /> <!-- INSIGHTS -->
         <activity
             android:name=".ui.home.InsightsActivity"
             android:exported="false" />
-
-        <!-- GOALS (despues) -->
-        <!--
         <activity
-            android:name=".ui.goals.GoalsActivity"
+            android:name=".ui.home.ProfileActivity"
             android:exported="false" />
-        -->
-
+        <activity
+            android:name=".ui.home.GoalsActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
