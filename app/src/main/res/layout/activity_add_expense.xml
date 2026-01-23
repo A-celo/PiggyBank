@@ -57,13 +57,14 @@
         android:id="@+id/tvAddExpenseTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add an expense"
+        android:text="Add Expense"
         android:textSize="32sp"
         android:textColor="#4C4C4C"
         android:textStyle="bold"
-        android:layout_marginStart="56dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/btnBack"/>
+        android:layout_marginStart="16dp"
+        app:layout_constraintStart_toEndOf="@id/btnBack"
+        app:layout_constraintTop_toTopOf="@id/btnBack"
+        app:layout_constraintBottom_toBottomOf="@id/btnBack" />
 
     <TextView
         android:id="@+id/tvAddExpenseSubtitle"
