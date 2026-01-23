@@ -123,9 +123,6 @@ class AddExpenseActivity : AppCompatActivity() {
         // Cargar gastos del usuario
         loadUserExpenses()
 
-        // Configurar botón de volver
-        findViewById<ImageView>(R.id.btnBack).setOnClickListener { finish() }
-
         // Configurar botón para abrir overlay
         btnAddExpenseOverlay.setOnClickListener {
             showAddExpenseOverlay()
