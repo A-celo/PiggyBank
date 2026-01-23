@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -6,57 +5,53 @@
     android:background="#FFFFFF"
     android:padding="24dp">
 
-    <!-- Título -->
+    <!-- Title -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Add a new expense"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#000000"
         android:gravity="center"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="20dp"/>
 
-    <!-- Monto grande -->
+    <!-- Amount Preview (más discreto) -->
     <TextView
         android:id="@+id/tvAmountPreview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="$0.00"
-        android:textSize="48sp"
+        android:textSize="32sp"
         android:textStyle="bold"
         android:textColor="#000000"
         android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="12dp"/>
 
-    <!-- Input de monto -->
+    <!-- Amount Input -->
     <EditText
         android:id="@+id/etAmount"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:hint="$0.0"
         android:inputType="numberDecimal"
-        android:textSize="24sp"
-        android:textColor="#000000"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"/>
-
-    <!-- Nota -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Note"
         android:textSize="16sp"
-        android:textColor="#666666"
-        android:layout_marginBottom="8dp"/>
+        android:textColor="#000000"
+        android:textColorHint="#666666"
+        android:background="#F5F5F5"
+        android:padding="12dp"
+        android:layout_marginBottom="16dp"/>
 
+
+    <!-- Note -->
     <EditText
         android:id="@+id/etNote"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:hint="Add a note"
+        android:hint="Note"
         android:textSize="16sp"
         android:textColor="#000000"
+        android:textColorHint="#666666"
         android:background="#F5F5F5"
         android:padding="12dp"
         android:layout_marginBottom="16dp"/>
@@ -78,15 +73,35 @@
         android:padding="12dp"
         android:layout_marginBottom="24dp"/>
 
-    <!-- Fecha -->
+    <!-- Payment Method -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Payment Method"
+        android:textSize="16sp"
+        android:textColor="#666666"
+        android:layout_marginBottom="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerPayment"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#F5F5F5"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Date -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:orientation="horizontal"
+        android:background="#F5F5F5"
+        android:padding="12dp"
         android:gravity="center_vertical"
-        android:layout_marginBottom="24dp">
+        android:layout_marginBottom="16dp">
 
         <TextView
+            android:id="@+id/tvDate"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -94,25 +109,15 @@
             android:textSize="16sp"
             android:textColor="#666666"/>
 
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Today"
-            android:textSize="16sp"
-            android:textColor="#000000"
-            android:layout_marginEnd="8dp"/>
-
         <ImageView
             android:id="@+id/btnDatePicker"
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@android:drawable/ic_menu_my_calendar"
             android:tint="#C7B8EA"/>
-
     </LinearLayout>
 
-    <!-- Botón Guardar -->
+    <!-- Save Button -->
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
@@ -121,9 +126,9 @@
         android:textSize="18sp"
         android:textColor="#FFFFFF"
         android:background="#C7B8EA"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="12dp"/>
 
-    <!-- Botón Cancelar -->
+    <!-- Cancel -->
     <TextView
         android:id="@+id/btnCancel"
         android:layout_width="match_parent"
@@ -132,6 +137,6 @@
         android:textSize="16sp"
         android:textColor="#C7B8EA"
         android:gravity="center"
-        android:padding="16dp"/>
+        android:padding="12dp"/>
 
 </LinearLayout>

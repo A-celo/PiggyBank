@@ -138,6 +138,7 @@ class AddExpenseActivity : AppCompatActivity() {
         val etAmount = view.findViewById<EditText>(R.id.etAmount)
         val etNote = view.findViewById<EditText>(R.id.etNote)
         val spinnerCategory = view.findViewById<Spinner>(R.id.spinnerCategory)
+        val spinnerPayment = view.findViewById<Spinner>(R.id.spinnerPayment) // Add this
         val tvDate = view.findViewById<TextView>(R.id.tvDate)
         val tvAmount = view.findViewById<TextView>(R.id.tvAmountPreview)
         val btnDatePicker = view.findViewById<ImageView>(R.id.btnDatePicker)
@@ -156,9 +157,23 @@ class AddExpenseActivity : AppCompatActivity() {
             "Personal Care",
             "Other"
         )
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerCategory.adapter = adapter
+        val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCategory.adapter = categoryAdapter
+
+        // Configurar spinner de métodos de pago
+        val paymentMethods = arrayOf(
+            "Cash",
+            "Credit Card",
+            "Debit Card",
+            "Bank Transfer",
+            "Digital Wallet",
+            "PayPal",
+            "Other"
+        )
+        val paymentAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, paymentMethods)
+        paymentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerPayment.adapter = paymentAdapter
 
         // Configurar fecha inicial
         updateDateTextView(tvDate)
@@ -188,9 +203,10 @@ class AddExpenseActivity : AppCompatActivity() {
             val amountText = etAmount.text.toString().trim()
             val note = etNote.text.toString().trim()
             val category = spinnerCategory.selectedItem.toString()
+            val paymentMethod = spinnerPayment.selectedItem.toString() // Add this
 
             if (validateExpenseInput(amountText, note)) {
-                saveExpenseToFirebase(amountText, note, category)
+                saveExpenseToFirebase(amountText, note, category, paymentMethod) // Update this
                 dialog.dismiss()
             }
         }
@@ -248,7 +264,7 @@ class AddExpenseActivity : AppCompatActivity() {
         return true
     }
 
-    private fun saveExpenseToFirebase(amountText: String, note: String, category: String) {
+    private fun saveExpenseToFirebase(amountText: String, note: String, category: String, paymentMethod: String) {
         val user = auth.currentUser
         if (user == null) {
             Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show()
@@ -257,12 +273,13 @@ class AddExpenseActivity : AppCompatActivity() {
 
         val amount = amountText.toDouble()
 
-        // Crear objeto Expense
+        // Crear objeto Expense con paymentMethod
         val expense = hashMapOf(
             "userId" to user.uid,
             "amount" to amount,
             "description" to note,
             "category" to category,
+            "paymentMethod" to paymentMethod, // Add this
             "date" to selectedDate,
             "createdAt" to FieldValue.serverTimestamp(),
             "currency" to "USD"
