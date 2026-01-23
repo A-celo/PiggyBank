@@ -67,7 +67,7 @@
         android:id="@+id/tvAddExpenseSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Write or dictate your expense"
+        android:text="Write a new entry"
         android:textSize="18sp"
         android:textColor="#525252"
         android:layout_marginTop="16dp"

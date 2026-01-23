@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piggybank.R
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FieldValue
@@ -138,7 +139,7 @@ class AddExpenseActivity : AppCompatActivity() {
         val etAmount = view.findViewById<EditText>(R.id.etAmount)
         val etNote = view.findViewById<EditText>(R.id.etNote)
         val spinnerCategory = view.findViewById<Spinner>(R.id.spinnerCategory)
-        val spinnerPayment = view.findViewById<Spinner>(R.id.spinnerPayment) // Add this
+        val spinnerPayment = view.findViewById<Spinner>(R.id.spinnerPayment)
         val tvDate = view.findViewById<TextView>(R.id.tvDate)
         val tvAmount = view.findViewById<TextView>(R.id.tvAmountPreview)
         val btnDatePicker = view.findViewById<ImageView>(R.id.btnDatePicker)
@@ -203,10 +204,10 @@ class AddExpenseActivity : AppCompatActivity() {
             val amountText = etAmount.text.toString().trim()
             val note = etNote.text.toString().trim()
             val category = spinnerCategory.selectedItem.toString()
-            val paymentMethod = spinnerPayment.selectedItem.toString() // Add this
+            val paymentMethod = spinnerPayment.selectedItem.toString()
 
             if (validateExpenseInput(amountText, note)) {
-                saveExpenseToFirebase(amountText, note, category, paymentMethod) // Update this
+                saveExpenseToFirebase(amountText, note, category, paymentMethod)
                 dialog.dismiss()
             }
         }
@@ -246,18 +247,18 @@ class AddExpenseActivity : AppCompatActivity() {
 
     private fun validateExpenseInput(amountText: String, note: String): Boolean {
         if (amountText.isEmpty()) {
-            Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please enter an amount")
             return false
         }
 
         val amount = amountText.toDoubleOrNull()
         if (amount == null || amount <= 0) {
-            Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please enter a valid amount")
             return false
         }
 
         if (note.isEmpty()) {
-            Toast.makeText(this, "Please add a note", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please add a note")
             return false
         }
 
@@ -267,7 +268,7 @@ class AddExpenseActivity : AppCompatActivity() {
     private fun saveExpenseToFirebase(amountText: String, note: String, category: String, paymentMethod: String) {
         val user = auth.currentUser
         if (user == null) {
-            Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please sign in first")
             return
         }
 
@@ -279,7 +280,7 @@ class AddExpenseActivity : AppCompatActivity() {
             "amount" to amount,
             "description" to note,
             "category" to category,
-            "paymentMethod" to paymentMethod, // Add this
+            "paymentMethod" to paymentMethod,
             "date" to selectedDate,
             "createdAt" to FieldValue.serverTimestamp(),
             "currency" to "USD"
@@ -289,6 +290,8 @@ class AddExpenseActivity : AppCompatActivity() {
         db.collection("expenses")
             .add(expense)
             .addOnSuccessListener { documentReference ->
+                android.util.Log.d("AddExpenseActivity", "Expense added successfully: ${documentReference.id}")
+
                 // Actualizar el balance del usuario
                 updateUserBalance(user.uid, amount)
 
@@ -296,14 +299,95 @@ class AddExpenseActivity : AppCompatActivity() {
                 updateUserStats(user.uid, amount)
 
                 // Mostrar mensaje de éxito
-                Toast.makeText(this, "Expense added successfully!", Toast.LENGTH_SHORT).show()
+                showSuccessDialog()
 
                 // Recargar la lista de gastos
                 loadUserExpenses()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error adding expense: ${e.message}", Toast.LENGTH_LONG).show()
+                android.util.Log.e("AddExpenseActivity", "Error adding expense: ${e.message}")
+                showErrorDialog("Error adding expense: ${e.message}")
             }
+    }
+
+    private fun showSuccessDialog() {
+        try {
+            // Asegurar que estamos en el hilo principal
+            runOnUiThread {
+                // Crear un diálogo personalizado
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_expense_confirmation, null)
+
+                // Configurar el texto
+                val tvTitle = dialogView.findViewById<TextView>(R.id.tvTitle)
+                val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSubtitle)
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+
+                tvTitle?.text = "Your expense was added successfully!"
+                tvSubtitle?.text = "Keep saving! You almost met your goal"
+
+                // Crear el diálogo
+                val dialog = MaterialAlertDialogBuilder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                // Configurar el botón OK
+                btnOk?.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                // Mostrar el diálogo
+                try {
+                    dialog.show()
+                } catch (e: Exception) {
+                    //android.util.Log.e("AddExpenseActivity", "Error showing success dialog: ${e.message}")
+                    Toast.makeText(this, "Expense added successfully!", Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            //android.util.Log.e("AddExpenseActivity", "Error in showSuccessDialog: ${e.message}")
+            Toast.makeText(this, "Expense added successfully!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showErrorDialog(message: String? = null) {
+        try {
+            // Asegurar que estamos en el hilo principal
+            runOnUiThread {
+                // Crear un diálogo personalizado
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_expense_error, null)
+
+                // Configurar el texto
+                val tvTitle = dialogView.findViewById<TextView>(R.id.there_was_a)
+                val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvErrorMessage)
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOkError)
+
+                tvTitle?.text = "There was a mistake!"
+                tvSubtitle?.text = message ?: "Try to add your expense again to keep saving!"
+
+                // Crear el diálogo
+                val dialog = MaterialAlertDialogBuilder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                // Configurar el botón OK
+                btnOk?.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                // Mostrar el diálogo
+                try {
+                    dialog.show()
+                } catch (e: Exception) {
+                    //android.util.Log.e("AddExpenseActivity", "Error showing error dialog: ${e.message}")
+                    Toast.makeText(this, message ?: "An error occurred", Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            //android.util.Log.e("AddExpenseActivity", "Error in showErrorDialog: ${e.message}")
+            Toast.makeText(this, message ?: "An error occurred", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun updateUserBalance(userId: String, amount: Double) {
@@ -339,7 +423,9 @@ class AddExpenseActivity : AppCompatActivity() {
             .limit(50)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Toast.makeText(this, "Error loading expenses", Toast.LENGTH_SHORT).show()
+                    // Solo mostrar error si es crítico y no es un problema de permisos inicial
+                    android.util.Log.e("AddExpenseActivity", "Error loading expenses: ${error.message}")
+                    // No mostrar diálogo, solo loguear el error
                     return@addSnapshotListener
                 }
 
@@ -380,14 +466,55 @@ class AddExpenseActivity : AppCompatActivity() {
         db.collection("expenses").document(expense.id)
             .delete()
             .addOnSuccessListener {
+                android.util.Log.d("AddExpenseActivity", "Expense deleted successfully")
+
                 // Actualizar balance del usuario (sumar el monto de vuelta)
                 updateUserBalance(expense.userId, -expense.amount)
 
-                Toast.makeText(this, "Expense deleted", Toast.LENGTH_SHORT).show()
+                // Mostrar mensaje de éxito
+                showSuccessDialog("Expense deleted successfully!")
+
+                // Recargar gastos
                 loadUserExpenses()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error deleting expense", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("AddExpenseActivity", "Error deleting expense: ${e.message}")
+                showErrorDialog("Error deleting expense: ${e.message}")
             }
+    }
+
+    // Sobrecarga para mostrar diferentes mensajes de éxito
+    private fun showSuccessDialog(message: String) {
+        try {
+            runOnUiThread {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_expense_confirmation, null)
+
+                val tvTitle = dialogView.findViewById<TextView>(R.id.tvTitle)
+                val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSubtitle)
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+
+                tvTitle?.text = "Success!"
+                tvSubtitle?.text = message
+
+                val dialog = MaterialAlertDialogBuilder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                btnOk?.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                try {
+                    dialog.show()
+                } catch (e: Exception) {
+                    android.util.Log.e("AddExpenseActivity", "Error showing success dialog: ${e.message}")
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AddExpenseActivity", "Error in showSuccessDialog(String): ${e.message}")
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 }
