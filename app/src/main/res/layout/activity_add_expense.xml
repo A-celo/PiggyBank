@@ -2,13 +2,11 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FAFAFA">
 
     <!-- Header -->
-
     <View
         android:id="@+id/headerBackground"
         android:layout_width="0dp"
@@ -57,58 +55,53 @@
         android:id="@+id/tvAddExpenseTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Add Expense"
+        android:text="Add an expense"
         android:textSize="32sp"
         android:textColor="#4C4C4C"
         android:textStyle="bold"
-        android:layout_marginStart="16dp"
-        app:layout_constraintStart_toEndOf="@id/btnBack"
-        app:layout_constraintTop_toTopOf="@id/btnBack"
-        app:layout_constraintBottom_toBottomOf="@id/btnBack" />
+        android:layout_marginStart="56dp"
+        app:layout_constraintStart_toStartOf="@id/headerBackground"
+        app:layout_constraintTop_toTopOf="@id/btnBack"/>
 
     <TextView
         android:id="@+id/tvAddExpenseSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Write a new entry:"
+        android:text="Write a new entry"
         android:textSize="18sp"
         android:textColor="#525252"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="@id/tvAddExpenseTitle"
         app:layout_constraintTop_toBottomOf="@id/tvAddExpenseTitle"/>
 
-    <!-- Input -->
-
-    <!-- Boton -->
-
-    <!-- Total Expenses Text -->
-
+    <!-- Boton (moved up) -->
     <Button
         android:id="@+id/btnAddExpense"
         android:layout_width="261dp"
         android:layout_height="wrap_content"
-        android:backgroundTint="#C7B8EA"
         android:minHeight="56dp"
         android:text="Add Expense"
-        android:textAllCaps="false"
-        android:textColor="#FFFFFF"
         android:textSize="24sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#C7B8EA"
+        android:textAllCaps="false"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/tvAddExpenseSubtitle"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="232dp"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintEnd_toEndOf="parent"/>
 
+    <!-- tvTotalExpenses  -->
     <TextView
         android:id="@+id/tvTotalExpenses"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="Total: $0.00"
-        android:textColor="#666666"
         android:textSize="18sp"
+        android:textColor="#666666"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/btnAddExpense"
-        tools:layout_editor_absoluteX="43dp"
-        tools:ignore="MissingConstraints" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Expenses -->
 
@@ -116,14 +109,13 @@
         android:id="@+id/tvExpensesTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:text="Expenses"
-        android:textColor="#4C4C4C"
         android:textSize="32sp"
+        android:textColor="#4C4C4C"
         android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/tvTotalExpenses"
-        tools:layout_editor_absoluteX="43dp"
-        tools:ignore="MissingConstraints" />
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="@id/tvAddExpenseTitle"
+        app:layout_constraintTop_toBottomOf="@id/tvTotalExpenses"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvExpenses"

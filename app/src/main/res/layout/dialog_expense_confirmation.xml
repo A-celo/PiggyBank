@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#C7B8EA"
+    android:padding="24dp"
+    android:gravity="center"
+    android:clipToOutline="true">
+
+    <!-- Success icon (reuse same drawable if you want) -->
+    <ImageView
+        android:id="@+id/checkIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/check_circle"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Main message -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your expense was added successfully!"
+        android:textSize="26sp"
+        android:textColor="#FFFFFF"
+        android:gravity="center"
+        android:letterSpacing="0.03"
+        android:lineSpacingExtra="-4sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Secondary message -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Keep saving! You almost met your goal"
+        android:textSize="18sp"
+        android:textColor="#F3F3F3"
+        android:gravity="center"
+        android:letterSpacing="0.04"
+        android:lineSpacingExtra="-2sp"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- OK button -->
+    <Button
+        android:id="@+id/btnOk"
+        android:layout_width="120dp"
+        android:layout_height="48dp"
+        android:text="Ok"
+        android:textAllCaps="false"
+        android:textSize="18sp"
+        android:textColor="#C7B8EA"
+        android:backgroundTint="#FFFFFF"/>
+</LinearLayout>

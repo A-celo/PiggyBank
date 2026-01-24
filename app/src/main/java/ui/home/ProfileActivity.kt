@@ -1,14 +1,17 @@
 package com.example.piggybank.ui.home
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
+import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -16,8 +19,14 @@ import com.example.piggybank.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.*
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.*
+import com.google.firebase.*
 
 class ProfileActivity : AppCompatActivity() {
+
+    private lateinit var db: FirebaseFirestore
 
     private lateinit var btnBack: ImageView
     private lateinit var btnLogout: Button
@@ -35,7 +44,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var btnEditPassword: FrameLayout
     private lateinit var btnEditCurrency: FrameLayout
 
-    private val auth by lazy { FirebaseAuth.getInstance() }
+    private val auth by lazy { Firebase.auth }
 
     // Simple local storage for Name/Currency (para que se vea guardado sin backend)
     private val prefs by lazy { getSharedPreferences("profile_prefs", MODE_PRIVATE) }
@@ -63,6 +72,9 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
+        // Initialize Firebase
+        db = Firebase.firestore
+
         // Views
         btnBack = findViewById(R.id.btnBack)
         btnLogout = findViewById(R.id.btnLogout)
@@ -80,15 +92,19 @@ class ProfileActivity : AppCompatActivity() {
 
         ivProfilePhoto = findViewById(R.id.ivProfilePhoto)
 
+        // Load data
+        loadUserProfile()
+
+        // Back button
+        btnBack.setOnClickListener {
+            finish()
+        }
+
+        // Profile photo
         ivProfilePhoto.setOnClickListener {
             pickPhoto.launch(
                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
             )
-        }
-
-        // Back
-        btnBack.setOnClickListener {
-            finish()
         }
 
         // Log out
@@ -117,9 +133,7 @@ class ProfileActivity : AppCompatActivity() {
                 initialValue = tvName.text.toString(),
                 inputType = InputType.TYPE_CLASS_TEXT
             ) { newValue ->
-                tvName.text = newValue
-                prefs.edit().putString("name", newValue).apply()
-                Snackbar.make(view, "Name updated", Snackbar.LENGTH_SHORT).show()
+                updateUserNameInFirestore(newValue, view)
             }
         }
 
@@ -155,7 +169,11 @@ class ProfileActivity : AppCompatActivity() {
                             tvEmail.text = newEmail
                             Snackbar.make(view, "Email updated", Snackbar.LENGTH_SHORT).show()
                         } else {
-                            Snackbar.make(view, "Email update failed: ${updateTask.exception?.message}", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(
+                                view,
+                                "Email update failed: ${updateTask.exception?.message}",
+                                Snackbar.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }
@@ -170,7 +188,7 @@ class ProfileActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Pedimos el passwrd actual + password nueva
+            // Pedimos el password actual + password nueva
             showTwoFieldDialog(
                 title = "Change password",
                 firstHint = "Current password",
@@ -179,7 +197,11 @@ class ProfileActivity : AppCompatActivity() {
                 secondIsPassword = true
             ) { currentPassword, newPassword ->
                 if (newPassword.length < 6) {
-                    Snackbar.make(view, "Password must be at least 6 characters", Snackbar.LENGTH_LONG).show()
+                    Snackbar.make(
+                        view,
+                        "Password must be at least 6 characters",
+                        Snackbar.LENGTH_LONG
+                    ).show()
                     return@showTwoFieldDialog
                 }
 
@@ -201,7 +223,11 @@ class ProfileActivity : AppCompatActivity() {
                             tvPassword.text = "••••••••"
                             Snackbar.make(view, "Password updated", Snackbar.LENGTH_SHORT).show()
                         } else {
-                            Snackbar.make(view, "Password update failed: ${updateTask.exception?.message}", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(
+                                view,
+                                "Password update failed: ${updateTask.exception?.message}",
+                                Snackbar.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }
@@ -216,17 +242,43 @@ class ProfileActivity : AppCompatActivity() {
                 .setItems(options) { _, which ->
                     val selected = options[which]
                     tvCurrency.text = selected
+
+                    // Make sure you're saving to the SAME SharedPreferences key
+                    val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                     prefs.edit().putString("currency", selected).apply()
+
                     Snackbar.make(view, "Currency updated", Snackbar.LENGTH_SHORT).show()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
         }
 
-        // Load data
-        loadUserProfile()
-
         BottomMenuHelper.setupMenu(this, "profile")
+    }
+
+    private fun updateUserNameInFirestore(newName: String, view: View) {
+        val user = auth.currentUser
+        if (user == null) {
+            Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // Update UI immediately
+        tvName.text = newName
+
+        // Save to SharedPreferences for offline use
+        prefs.edit().putString("name", newName).apply()
+
+        // Save to Firestore
+        db.collection("users").document(user.uid)
+            .update("name", newName, "updatedAt", FieldValue.serverTimestamp())
+            .addOnSuccessListener {
+                Snackbar.make(view, "Name updated successfully!", Snackbar.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Snackbar.make(view, "Error updating name: ${e.message}", Snackbar.LENGTH_LONG)
+                    .show()
+            }
     }
 
     private fun loadUserProfile() {
@@ -247,7 +299,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun confirmDeleteAccount(view: android.view.View) {
+    private fun confirmDeleteAccount(view: View) {
         val user = auth.currentUser
         if (user == null) {
             Snackbar.make(view, "No user logged in", Snackbar.LENGTH_SHORT).show()
@@ -291,7 +343,11 @@ class ProfileActivity : AppCompatActivity() {
                                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                                 startActivity(intent)
                             } else {
-                                Snackbar.make(view, "Delete failed: ${deleteTask.exception?.message}", Snackbar.LENGTH_LONG).show()
+                                Snackbar.make(
+                                    view,
+                                    "Delete failed: ${deleteTask.exception?.message}",
+                                    Snackbar.LENGTH_LONG
+                                ).show()
                             }
                         }
                     }
@@ -304,8 +360,9 @@ class ProfileActivity : AppCompatActivity() {
         title: String,
         initialValue: String,
         inputType: Int,
-        hint: String = ""
-        , onSave: (String) -> Unit) {
+        hint: String = "",
+        onSave: (String) -> Unit
+    ) {
         val input = android.widget.EditText(this)
         input.setText(initialValue)
         input.inputType = inputType

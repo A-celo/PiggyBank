@@ -1,6 +1,7 @@
 package com.example.piggybank.ui.home
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piggybank.R
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FieldValue
@@ -29,6 +31,56 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
+// ==================== CURRENCY HELPER ====================
+object CurrencyHelper {
+
+    // Currency symbols map
+    private val currencySymbols = mapOf(
+        "USD" to "$",
+        "EUR" to "€",
+        "PLN" to "zł",
+        "GBP" to "£"
+    )
+
+    // Get user's selected currency from SharedPreferences
+    fun getUserCurrency(context: Context): String {
+        val prefs = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val currency = prefs.getString("currency", "USD") ?: "USD"
+
+        // Debug logging
+        android.util.Log.d("CurrencyHelper", "Retrieved currency from prefs: $currency")
+        android.util.Log.d("CurrencyHelper", "All prefs: ${prefs.all}")
+
+        return currency
+    }
+
+    // Get currency symbol for a currency code
+    fun getCurrencySymbol(currencyCode: String): String {
+        val symbol = currencySymbols[currencyCode] ?: "$"
+        android.util.Log.d("CurrencyHelper", "Symbol for $currencyCode: $symbol")
+        return symbol
+    }
+
+    // Format amount with user's currency
+    fun formatAmount(context: Context, amount: Double): String {
+        val currency = getUserCurrency(context)
+        val symbol = getCurrencySymbol(currency)
+
+        // Use appropriate decimal formatting based on currency
+        val decimalFormat = when (currency) {
+            "EUR", "USD", "GBP" -> "%.2f"
+            "PLN" -> "%.2f"
+            else -> "%.2f"
+        }
+
+        val formattedAmount = String.format(Locale.getDefault(), decimalFormat, amount)
+        val result = "$symbol$formattedAmount"
+
+        android.util.Log.d("CurrencyHelper", "Formatted $amount as: $result (currency: $currency)")
+        return result
+    }
+}
+
 // ==================== CLASE MODELO (dentro del mismo archivo) ====================
 data class Expense(
     val id: String = "",
@@ -36,27 +88,37 @@ data class Expense(
     val description: String = "",
     val category: String = "",
     val date: Date = Date(),
-    val userId: String = ""
+    val userId: String = "",
+    val paymentMethod: String = "",
+    val notes: String = "",
+    val currency: String = "USD"
 )
 
 // ==================== CLASE ADAPTER (dentro del mismo archivo) ====================
 class ExpenseAdapter(
     private val expenses: List<Expense>,
-    private val onItemClick: (Expense) -> Unit
+    private val onItemClick: (Expense) -> Unit,
+    private val context: Context
 ) : RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     inner class ExpenseViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val tvAmount: TextView = itemView.findViewById(R.id.tvAmount)
-        private val tvDescription: TextView = itemView.findViewById(R.id.tvDescription)
-        private val tvCategory: TextView = itemView.findViewById(R.id.tvCategory)
+        private val tvExpenseDescription: TextView = itemView.findViewById(R.id.tvExpenseDescription)
         private val tvDate: TextView = itemView.findViewById(R.id.tvDate)
 
         fun bind(expense: Expense) {
-            tvAmount.text = String.format(Locale.getDefault(), "$%.2f", expense.amount)
-            tvDescription.text = expense.description
-            tvCategory.text = expense.category
+            // Format amount with user's currency
+            val formattedAmount = CurrencyHelper.formatAmount(context, expense.amount)
+            val categoryLower = expense.category.lowercase()
 
-            val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+            // Use localized string
+            tvExpenseDescription.text = context.getString(
+                R.string.expense_description_format,
+                formattedAmount,
+                categoryLower
+            )
+
+            // Format date as dd/MM/yyyy
+            val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
             tvDate.text = dateFormat.format(expense.date)
 
             itemView.setOnClickListener {
@@ -100,22 +162,21 @@ class AddExpenseActivity : AppCompatActivity() {
         auth = Firebase.auth
         db = Firebase.firestore
 
-        // Inicializar vistas - AÑADIR EL TOTAL EXPENSES SI NO EXISTE
+        // Inicializar vistas
         rvExpenses = findViewById(R.id.rvExpenses)
         btnAddExpenseOverlay = findViewById(R.id.btnAddExpense)
 
         // Buscar o crear tvTotalExpenses
         tvTotalExpenses = findViewById(R.id.tvTotalExpenses)
         if (tvTotalExpenses == null) {
-            // Si no existe en el layout, lo creamos programáticamente
             tvTotalExpenses = TextView(this)
         }
 
         // Configurar RecyclerView
         expensesList = mutableListOf()
-        expenseAdapter = ExpenseAdapter(expensesList) { expense ->
+        expenseAdapter = ExpenseAdapter(expensesList, { expense ->
             showExpenseOptions(expense)
-        }
+        }, this)
 
         rvExpenses.layoutManager = LinearLayoutManager(this)
         rvExpenses.adapter = expenseAdapter
@@ -130,7 +191,6 @@ class AddExpenseActivity : AppCompatActivity() {
     }
 
     private fun showAddExpenseOverlay() {
-        // Crear BottomSheetDialog
         val dialog = BottomSheetDialog(this)
         val view = LayoutInflater.from(this).inflate(R.layout.dialog_add_expense, null)
 
@@ -138,6 +198,7 @@ class AddExpenseActivity : AppCompatActivity() {
         val etAmount = view.findViewById<EditText>(R.id.etAmount)
         val etNote = view.findViewById<EditText>(R.id.etNote)
         val spinnerCategory = view.findViewById<Spinner>(R.id.spinnerCategory)
+        val spinnerPayment = view.findViewById<Spinner>(R.id.spinnerPayment)
         val tvDate = view.findViewById<TextView>(R.id.tvDate)
         val tvAmount = view.findViewById<TextView>(R.id.tvAmountPreview)
         val btnDatePicker = view.findViewById<ImageView>(R.id.btnDatePicker)
@@ -156,9 +217,23 @@ class AddExpenseActivity : AppCompatActivity() {
             "Personal Care",
             "Other"
         )
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerCategory.adapter = adapter
+        val categoryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCategory.adapter = categoryAdapter
+
+        // Configurar spinner de métodos de pago
+        val paymentMethods = arrayOf(
+            "Cash",
+            "Credit Card",
+            "Debit Card",
+            "Bank Transfer",
+            "Digital Wallet",
+            "PayPal",
+            "Other"
+        )
+        val paymentAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, paymentMethods)
+        paymentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerPayment.adapter = paymentAdapter
 
         // Configurar fecha inicial
         updateDateTextView(tvDate)
@@ -176,9 +251,9 @@ class AddExpenseActivity : AppCompatActivity() {
                 val amountText = s.toString().trim()
                 if (amountText.isNotEmpty()) {
                     val amount = amountText.toDoubleOrNull() ?: 0.0
-                    tvAmount.text = String.format(Locale.getDefault(), "$%.2f", amount)
+                    tvAmount.text = CurrencyHelper.formatAmount(this@AddExpenseActivity, amount)
                 } else {
-                    tvAmount.text = "$0.00"
+                    tvAmount.text = CurrencyHelper.formatAmount(this@AddExpenseActivity, 0.0)
                 }
             }
         })
@@ -188,9 +263,10 @@ class AddExpenseActivity : AppCompatActivity() {
             val amountText = etAmount.text.toString().trim()
             val note = etNote.text.toString().trim()
             val category = spinnerCategory.selectedItem.toString()
+            val paymentMethod = spinnerPayment.selectedItem.toString()
 
             if (validateExpenseInput(amountText, note)) {
-                saveExpenseToFirebase(amountText, note, category)
+                saveExpenseToFirebase(amountText, note, category, paymentMethod)
                 dialog.dismiss()
             }
         }
@@ -230,48 +306,55 @@ class AddExpenseActivity : AppCompatActivity() {
 
     private fun validateExpenseInput(amountText: String, note: String): Boolean {
         if (amountText.isEmpty()) {
-            Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please enter an amount")
             return false
         }
 
         val amount = amountText.toDoubleOrNull()
         if (amount == null || amount <= 0) {
-            Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please enter a valid amount")
             return false
         }
 
         if (note.isEmpty()) {
-            Toast.makeText(this, "Please add a note", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please add a note")
             return false
         }
 
         return true
     }
 
-    private fun saveExpenseToFirebase(amountText: String, note: String, category: String) {
+    private fun saveExpenseToFirebase(amountText: String, note: String, category: String, paymentMethod: String) {
         val user = auth.currentUser
         if (user == null) {
-            Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show()
+            showErrorDialog("Please sign in first")
             return
         }
 
         val amount = amountText.toDouble()
 
-        // Crear objeto Expense
+        // Get user's selected currency
+        val userCurrency = CurrencyHelper.getUserCurrency(this)
+
+        // Crear objeto Expense con paymentMethod y currency
         val expense = hashMapOf(
             "userId" to user.uid,
             "amount" to amount,
             "description" to note,
             "category" to category,
+            "paymentMethod" to paymentMethod,
             "date" to selectedDate,
             "createdAt" to FieldValue.serverTimestamp(),
-            "currency" to "USD"
+            "currency" to userCurrency,
+            "notes" to note
         )
 
         // Guardar en Firestore
         db.collection("expenses")
             .add(expense)
             .addOnSuccessListener { documentReference ->
+                android.util.Log.d("AddExpenseActivity", "Expense added successfully: ${documentReference.id}")
+
                 // Actualizar el balance del usuario
                 updateUserBalance(user.uid, amount)
 
@@ -279,21 +362,89 @@ class AddExpenseActivity : AppCompatActivity() {
                 updateUserStats(user.uid, amount)
 
                 // Mostrar mensaje de éxito
-                Toast.makeText(this, "Expense added successfully!", Toast.LENGTH_SHORT).show()
+                showSuccessDialog()
 
                 // Recargar la lista de gastos
                 loadUserExpenses()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error adding expense: ${e.message}", Toast.LENGTH_LONG).show()
+                android.util.Log.e("AddExpenseActivity", "Error adding expense: ${e.message}")
+                showErrorDialog("Error adding expense: ${e.message}")
             }
+    }
+
+    private fun showSuccessDialog() {
+        try {
+            runOnUiThread {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_expense_confirmation, null)
+
+                val tvTitle = dialogView.findViewById<TextView>(R.id.tvTitle)
+                val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSubtitle)
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+
+                tvTitle?.text = "Your expense was added successfully!"
+                tvSubtitle?.text = "Keep saving! You almost met your goal"
+
+                val dialog = MaterialAlertDialogBuilder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                btnOk?.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                try {
+                    dialog.show()
+                } catch (e: Exception) {
+                    android.util.Log.e("AddExpenseActivity", "Error showing success dialog: ${e.message}")
+                    Toast.makeText(this, "Expense added successfully!", Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AddExpenseActivity", "Error in showSuccessDialog: ${e.message}")
+            Toast.makeText(this, "Expense added successfully!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun showErrorDialog(message: String? = null) {
+        try {
+            runOnUiThread {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_expense_error, null)
+
+                val tvTitle = dialogView.findViewById<TextView>(R.id.there_was_a)
+                val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvErrorMessage)
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOkError)
+
+                tvTitle?.text = "There was a mistake!"
+                tvSubtitle?.text = message ?: "Try to add your expense again to keep saving!"
+
+                val dialog = MaterialAlertDialogBuilder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                btnOk?.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                try {
+                    dialog.show()
+                } catch (e: Exception) {
+                    android.util.Log.e("AddExpenseActivity", "Error showing error dialog: ${e.message}")
+                    Toast.makeText(this, message ?: "An error occurred", Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AddExpenseActivity", "Error in showErrorDialog: ${e.message}")
+            Toast.makeText(this, message ?: "An error occurred", Toast.LENGTH_LONG).show()
+        }
     }
 
     private fun updateUserBalance(userId: String, amount: Double) {
         db.collection("users").document(userId)
             .update("currentBalance", FieldValue.increment(-amount))
             .addOnFailureListener { e ->
-                // Log error pero continuar
                 println("Error updating balance: ${e.message}")
             }
     }
@@ -322,7 +473,7 @@ class AddExpenseActivity : AppCompatActivity() {
             .limit(50)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
-                    Toast.makeText(this, "Error loading expenses", Toast.LENGTH_SHORT).show()
+                    android.util.Log.e("AddExpenseActivity", "Error loading expenses: ${error.message}")
                     return@addSnapshotListener
                 }
 
@@ -336,41 +487,123 @@ class AddExpenseActivity : AppCompatActivity() {
                         description = document.getString("description") ?: "",
                         category = document.getString("category") ?: "Other",
                         date = (document.getDate("date") ?: Date()),
-                        userId = document.getString("userId") ?: ""
+                        userId = document.getString("userId") ?: "",
+                        paymentMethod = document.getString("paymentMethod") ?: "",
+                        notes = document.getString("notes") ?: document.getString("description") ?: "",
+                        currency = document.getString("currency") ?: "USD"
                     )
                     expensesList.add(expense)
                     total += expense.amount
                 }
 
                 expenseAdapter.notifyDataSetChanged()
-                tvTotalExpenses.text = String.format(Locale.getDefault(), "Total: $%.2f", total)
+
+                // Format total with user's currency
+                val formattedTotal = CurrencyHelper.formatAmount(this, total)
+                tvTotalExpenses.text = "Total: $formattedTotal"
             }
     }
 
     private fun showExpenseOptions(expense: Expense) {
-        // Diálogo simple para eliminar
-        android.app.AlertDialog.Builder(this)
-            .setTitle("Delete Expense")
-            .setMessage("Delete '${expense.description}'?")
-            .setPositiveButton("Delete") { _, _ ->
-                deleteExpense(expense)
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+        val dialogView = LayoutInflater.from(this).inflate(
+            R.layout.dialog_expense_details,
+            null
+        )
+
+        val dialog = android.app.AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        // Views
+        val tvDescription = dialogView.findViewById<TextView>(R.id.tvDescription)
+        val tvNotes = dialogView.findViewById<TextView>(R.id.tvNotes)
+        val tvPayment = dialogView.findViewById<TextView>(R.id.tvPayment)
+        val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+        val btnDelete = dialogView.findViewById<Button>(R.id.btnDelete)
+        val btnClose = dialogView.findViewById<ImageView>(R.id.btnClose)
+
+        // Format date for display
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val formattedDate = dateFormat.format(expense.date)
+
+        // Format amount for display WITH USER'S CURRENCY
+        val formattedAmount = CurrencyHelper.formatAmount(this, expense.amount)
+
+        // Populate data
+        tvDescription?.text = "You spent $formattedAmount on ${expense.category} on $formattedDate"
+        tvNotes?.text = expense.notes.ifEmpty { expense.description.ifEmpty { "—" } }
+        tvPayment?.text = expense.paymentMethod.ifEmpty { "Not specified" }
+
+        // Actions
+        btnOk?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnClose?.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnDelete?.setOnClickListener {
+            dialog.dismiss()
+            deleteExpense(expense)
+        }
+
+        dialog.show()
     }
 
     private fun deleteExpense(expense: Expense) {
         db.collection("expenses").document(expense.id)
             .delete()
             .addOnSuccessListener {
+                android.util.Log.d("AddExpenseActivity", "Expense deleted successfully")
+
                 // Actualizar balance del usuario (sumar el monto de vuelta)
                 updateUserBalance(expense.userId, -expense.amount)
 
-                Toast.makeText(this, "Expense deleted", Toast.LENGTH_SHORT).show()
+                // Mostrar mensaje de éxito
+                showSuccessDialog("Expense deleted successfully!")
+
+                // Recargar gastos
                 loadUserExpenses()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(this, "Error deleting expense", Toast.LENGTH_SHORT).show()
+                android.util.Log.e("AddExpenseActivity", "Error deleting expense: ${e.message}")
+                showErrorDialog("Error deleting expense: ${e.message}")
             }
+    }
+
+    // Sobrecarga para mostrar diferentes mensajes de éxito
+    private fun showSuccessDialog(message: String) {
+        try {
+            runOnUiThread {
+                val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_expense_confirmation, null)
+
+                val tvTitle = dialogView.findViewById<TextView>(R.id.tvTitle)
+                val tvSubtitle = dialogView.findViewById<TextView>(R.id.tvSubtitle)
+                val btnOk = dialogView.findViewById<Button>(R.id.btnOk)
+
+                tvTitle?.text = "Success!"
+                tvSubtitle?.text = message
+
+                val dialog = MaterialAlertDialogBuilder(this)
+                    .setView(dialogView)
+                    .setCancelable(false)
+                    .create()
+
+                btnOk?.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                try {
+                    dialog.show()
+                } catch (e: Exception) {
+                    android.util.Log.e("AddExpenseActivity", "Error showing success dialog: ${e.message}")
+                    Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("AddExpenseActivity", "Error in showSuccessDialog(String): ${e.message}")
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+        }
     }
 }
