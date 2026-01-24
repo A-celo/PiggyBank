@@ -1,6 +1,7 @@
 package com.example.piggybank.ui.home
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -241,7 +242,11 @@ class ProfileActivity : AppCompatActivity() {
                 .setItems(options) { _, which ->
                     val selected = options[which]
                     tvCurrency.text = selected
+
+                    // Make sure you're saving to the SAME SharedPreferences key
+                    val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                     prefs.edit().putString("currency", selected).apply()
+
                     Snackbar.make(view, "Currency updated", Snackbar.LENGTH_SHORT).show()
                 }
                 .setNegativeButton("Cancel", null)

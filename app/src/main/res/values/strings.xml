@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">PiggyBank</string>
+    <string name="expense_description_format">You spent %1$s in %2$s</string>
 </resources>

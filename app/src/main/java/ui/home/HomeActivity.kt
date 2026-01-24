@@ -1,5 +1,6 @@
 package com.example.piggybank.ui.home
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -7,10 +8,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.piggybank.R
+import com.example.piggybank.*
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.*
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.*
 import com.google.firebase.*
 import java.util.Calendar
@@ -97,9 +98,9 @@ class HomeActivity : AppCompatActivity() {
                     total += amount
                 }
 
-                // Update UI with real spending
-                val formattedTotal = String.format(Locale.getDefault(), "%.2f", total)
-                tvWeeklySpend.text = "You've spent \$$formattedTotal this week."
+                // Update UI with real spending - USING CurrencyHelper
+                val formattedAmount = CurrencyHelper.formatAmount(this, total)
+                tvWeeklySpend.text = "You've spent $formattedAmount this week."
 
                 // Also save to SharedPreferences for quick access
                 val prefs = getSharedPreferences("profile_prefs", MODE_PRIVATE)
