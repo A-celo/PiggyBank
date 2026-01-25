@@ -30,14 +30,19 @@ class GoalsActivity : AppCompatActivity() {
         btnCreateGoal = findViewById(R.id.btnCreateGoal)
 
         // SEGUNDO: Configurar el adapter
-        goalAdapter = GoalAdapter(goalsList) { loadGoalsFromFirebase() }
+        goalAdapter = GoalAdapter(
+            goalsList,
+            onGoalUpdated = { listenGoalsFromFirebase() },
+            onGoalDeleted = { listenGoalsFromFirebase() }
+        )
         rvGoals.adapter = goalAdapter
         rvGoals.layoutManager = LinearLayoutManager(this)
 
+
         // TERCERO: Configurar listeners
         btnCreateGoal.setOnClickListener {
-            val dialog = CreateGoalDialog()
-            dialog.onGoalSaved = { loadGoalsFromFirebase() }
+            val dialog = CreateGoalDialog() // <-- Siempre vacío
+            dialog.onGoalSaved = { listenGoalsFromFirebase() }
             dialog.show(supportFragmentManager, "CreateGoalDialog")
         }
 
@@ -53,24 +58,28 @@ class GoalsActivity : AppCompatActivity() {
         BottomMenuHelper.setupMenu(this, "goals")
 
         // SEXTO: Cargar datos
-        loadGoalsFromFirebase()
+        listenGoalsFromFirebase()
     }
 
-    private fun loadGoalsFromFirebase() {
+    private fun listenGoalsFromFirebase() {
         val db = FirebaseFirestore.getInstance()
+
         db.collection("goals")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                goalsList.clear()
-                for (doc in snapshot.documents) {
-                    val goal = doc.toObject(Goal::class.java)
-                    goal?.id = doc.id
-                    if (goal != null) goalsList.add(goal)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Toast.makeText(this, "Error loading goals", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
                 }
-                goalAdapter.notifyDataSetChanged()
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "Error loading goals: ${e.message}", Toast.LENGTH_SHORT).show()
+
+                if (snapshot != null) {
+                    goalsList.clear()
+                    for (doc in snapshot.documents) {
+                        val goal = doc.toObject(Goal::class.java)
+                        goal?.id = doc.id
+                        if (goal != null) goalsList.add(goal)
+                    }
+                    goalAdapter.notifyDataSetChanged()
+                }
             }
     }
 }
