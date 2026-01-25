@@ -4,5 +4,7 @@
     <color name="white">#FFFFFFFF</color>
     <color name="activeMenuColor">#6750A4</color>
     <color name="inactiveMenuColor">#C7B8EA</color>
+    <color name="purple_500">#6750A4</color>
+    <color name="purple_200">#C7B8EA</color>
 
 </resources>
