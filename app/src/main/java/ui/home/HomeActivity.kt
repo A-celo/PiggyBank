@@ -17,6 +17,7 @@ import com.google.firebase.*
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.example.piggybank.utils.CurrencyHelper
 
 class HomeActivity : AppCompatActivity() {
 
@@ -73,21 +74,16 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun loadWeeklyExpenses(userId: String) {
-        // Calculate start of week (Monday)
+        // Calculate 7 days ago
         val calendar = Calendar.getInstance()
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
-
-        val startOfWeek = calendar.time
+        calendar.add(Calendar.DAY_OF_YEAR, -7)
+        val sevenDaysAgo = calendar.time
         val now = Date()
 
-        // Query expenses for this week
+        // Query expenses for last 7 days
         db.collection("expenses")
             .whereEqualTo("userId", userId)
-            .whereGreaterThanOrEqualTo("date", startOfWeek)
+            .whereGreaterThanOrEqualTo("date", sevenDaysAgo)
             .whereLessThanOrEqualTo("date", now)
             .get()
             .addOnSuccessListener { querySnapshot ->
@@ -98,17 +94,15 @@ class HomeActivity : AppCompatActivity() {
                     total += amount
                 }
 
-                // Update UI with real spending - USING CurrencyHelper
                 val formattedAmount = CurrencyHelper.formatAmount(this, total)
-                tvWeeklySpend.text = "You've spent $formattedAmount this week."
 
-                // Also save to SharedPreferences for quick access
-                val prefs = getSharedPreferences("profile_prefs", MODE_PRIVATE)
-                prefs.edit().putFloat("weekly_spend", total.toFloat()).apply()
-            }
-            .addOnFailureListener { exception ->
-                Toast.makeText(this, "Error loading expenses: ${exception.message}", Toast.LENGTH_SHORT).show()
-                tvWeeklySpend.text = "Error loading expenses"
+                // Show different message based on count
+                val count = querySnapshot.documents.size
+                if (count == 0) {
+                    tvWeeklySpend.text = "No expenses in the last 7 days"
+                } else {
+                    tvWeeklySpend.text = "You've spent $formattedAmount in the last 7 days"
+                }
             }
     }
 }

@@ -27,7 +27,6 @@ import com.google.firebase.*
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
-
     private lateinit var btnBack: ImageView
     private lateinit var btnLogout: Button
     private lateinit var deleteAccount: TextView
@@ -95,9 +94,9 @@ class ProfileActivity : AppCompatActivity() {
         // Load data
         loadUserProfile()
 
-        // Back button
+        // Back button - ALWAYS go to Home page
         btnBack.setOnClickListener {
-            finish()
+            navigateToHome()
         }
 
         // Profile photo
@@ -254,6 +253,15 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         BottomMenuHelper.setupMenu(this, "profile")
+    }
+
+    private fun navigateToHome() {
+        val intent = Intent(this, HomeActivity::class.java)
+        // Clear the back stack so user can't go back to Profile with back button
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish() // Finish current activity so it's removed from stack
+        overridePendingTransition(0, 0)
     }
 
     private fun updateUserNameInFirestore(newName: String, view: View) {
@@ -418,5 +426,10 @@ class ProfileActivity : AppCompatActivity() {
                 onSave(first.text.toString().trim(), second.text.toString().trim())
             }
             .show()
+    }
+
+    // Optional: Override device back button to also go to Home
+    override fun onBackPressed() {
+        navigateToHome()
     }
 }
