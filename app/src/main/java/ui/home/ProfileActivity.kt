@@ -1,67 +1,57 @@
 package com.example.piggybank.ui.home
 
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.InputType
-import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.piggybank.R
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.*
 import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.*
-import com.google.firebase.*
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileActivity : AppCompatActivity() {
 
-    private lateinit var db: FirebaseFirestore
     private lateinit var btnBack: ImageView
     private lateinit var btnLogout: Button
     private lateinit var deleteAccount: TextView
 
-    // TextViews (NO EditText)
+    // textviews (no edittext)
     private lateinit var tvName: TextView
     private lateinit var tvEmail: TextView
     private lateinit var tvPassword: TextView
     private lateinit var tvCurrency: TextView
 
-    // Edit buttons
+    // edit buttons
     private lateinit var btnEditName: FrameLayout
     private lateinit var btnEditEmail: FrameLayout
     private lateinit var btnEditPassword: FrameLayout
     private lateinit var btnEditCurrency: FrameLayout
 
-    private val auth by lazy { Firebase.auth }
+    private val auth by lazy { FirebaseAuth.getInstance() }
 
-    // Simple local storage for Name/Currency (para que se vea guardado sin backend)
-    private val prefs by lazy { getSharedPreferences("profile_prefs", MODE_PRIVATE) }
+    // firestore instance 
+    private val db by lazy { FirebaseFirestore.getInstance() }
+
+    // simple local storage for name/currency (to persist without backend)
+    private val prefs by lazy {
+        val uid = auth.currentUser?.uid ?: "guest"
+        getSharedPreferences("profile_prefs_$uid", MODE_PRIVATE)
+    }
 
     private lateinit var ivProfilePhoto: ImageView
 
     private val pickPhoto =
-        registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
             if (uri != null) {
-                try {
-                    contentResolver.takePersistableUriPermission(
-                        uri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    )
-                } catch (_: Exception) {
-                    // En algunos dispositivos no hace falta / no lo permite
-                }
-
                 ivProfilePhoto.setImageURI(uri)
                 prefs.edit().putString("profile_photo_uri", uri.toString()).apply()
             }
@@ -71,10 +61,7 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
-        // Initialize Firebase
-        db = Firebase.firestore
-
-        // Views
+        // views
         btnBack = findViewById(R.id.btnBack)
         btnLogout = findViewById(R.id.btnLogout)
         deleteAccount = findViewById(R.id.btnDeleteAccount)
@@ -91,26 +78,20 @@ class ProfileActivity : AppCompatActivity() {
 
         ivProfilePhoto = findViewById(R.id.ivProfilePhoto)
 
-        // Load data
-        loadUserProfile()
-
-        // Back button - ALWAYS go to Home page
-        btnBack.setOnClickListener {
-            navigateToHome()
-        }
-
-        // Profile photo
         ivProfilePhoto.setOnClickListener {
-            pickPhoto.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
+            pickPhoto.launch("image/*")
         }
 
-        // Log out
+        // back
+        btnBack.setOnClickListener {
+            finish()
+        }
+
+        // log out
         btnLogout.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
 
-            Snackbar.make(it, "Logged out", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(it, "logged out", Snackbar.LENGTH_SHORT).show()
 
             val intent = Intent(
                 this,
@@ -120,57 +101,69 @@ class ProfileActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Delete account (real)
+        // delete account (real)
         deleteAccount.setOnClickListener { view ->
             confirmDeleteAccount(view)
         }
 
-        // Edit Name
+        // edit name
         btnEditName.setOnClickListener { view ->
             showTextEditDialog(
-                title = "Edit name",
+                title = "edit name",
                 initialValue = tvName.text.toString(),
                 inputType = InputType.TYPE_CLASS_TEXT
             ) { newValue ->
-                updateUserNameInFirestore(newValue, view)
+                tvName.text = newValue
+                prefs.edit().putString("name", newValue).apply()
+                Snackbar.make(view, "name updated", Snackbar.LENGTH_SHORT).show()
             }
         }
 
-        // Edit Email (Firebase)
+        // edit email (firebase)
         btnEditEmail.setOnClickListener { view ->
             val user = auth.currentUser
             if (user == null) {
-                Snackbar.make(view, "No user logged in", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(view, "no user logged in", Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Pedimos el email nuevo + password actual (re-auth)
+            // ask for new email + current password (re-auth)
             showTwoFieldDialog(
-                title = "Change email",
-                firstHint = "New email",
-                secondHint = "Current password"
+                title = "change email",
+                firstHint = "new email",
+                secondHint = "current password"
             ) { newEmail, currentPassword ->
                 val currentEmail = user.email
                 if (currentEmail.isNullOrBlank()) {
-                    Snackbar.make(view, "Current email not found", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(view, "current email not found", Snackbar.LENGTH_SHORT).show()
                     return@showTwoFieldDialog
                 }
 
                 val credential = EmailAuthProvider.getCredential(currentEmail, currentPassword)
                 user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
                     if (!reauthTask.isSuccessful) {
-                        Snackbar.make(view, "Wrong password", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(view, "wrong password", Snackbar.LENGTH_LONG).show()
                         return@addOnCompleteListener
                     }
 
                     user.updateEmail(newEmail).addOnCompleteListener { updateTask ->
                         if (updateTask.isSuccessful) {
                             tvEmail.text = newEmail
-                            Snackbar.make(view, "Email updated", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(view, "email updated", Snackbar.LENGTH_SHORT).show()
+
+                            // update firestore
+                            db.collection("users")
+                                .document(user.uid)
+                                .update(
+                                    mapOf(
+                                        "email" to newEmail,
+                                        "updatedAt" to FieldValue.serverTimestamp()
+                                    )
+                                )
                         } else {
                             Snackbar.make(
                                 view,
-                                "Email update failed: ${updateTask.exception?.message}",
+                                "email update failed: ${updateTask.exception?.message}",
                                 Snackbar.LENGTH_LONG
                             ).show()
                         }
@@ -179,52 +172,48 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        // Edit Password (Firebase)
+        // edit password (firebase)
         btnEditPassword.setOnClickListener { view ->
             val user = auth.currentUser
             if (user == null) {
-                Snackbar.make(view, "No user logged in", Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(view, "no user logged in", Snackbar.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            // Pedimos el password actual + password nueva
+            // ask for current password + new password
             showTwoFieldDialog(
-                title = "Change password",
-                firstHint = "Current password",
-                secondHint = "New password",
+                title = "change password",
+                firstHint = "current password",
+                secondHint = "new password",
                 firstIsPassword = true,
                 secondIsPassword = true
             ) { currentPassword, newPassword ->
                 if (newPassword.length < 6) {
-                    Snackbar.make(
-                        view,
-                        "Password must be at least 6 characters",
-                        Snackbar.LENGTH_LONG
-                    ).show()
+                    Snackbar.make(view, "password must be at least 6 characters", Snackbar.LENGTH_LONG).show()
                     return@showTwoFieldDialog
                 }
 
                 val currentEmail = user.email
                 if (currentEmail.isNullOrBlank()) {
-                    Snackbar.make(view, "Current email not found", Snackbar.LENGTH_SHORT).show()
+                    Snackbar.make(view, "current email not found", Snackbar.LENGTH_SHORT).show()
                     return@showTwoFieldDialog
                 }
 
                 val credential = EmailAuthProvider.getCredential(currentEmail, currentPassword)
                 user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
                     if (!reauthTask.isSuccessful) {
-                        Snackbar.make(view, "Wrong current password", Snackbar.LENGTH_LONG).show()
+                        Snackbar.make(view, "wrong current password", Snackbar.LENGTH_LONG).show()
                         return@addOnCompleteListener
                     }
 
                     user.updatePassword(newPassword).addOnCompleteListener { updateTask ->
                         if (updateTask.isSuccessful) {
                             tvPassword.text = "••••••••"
-                            Snackbar.make(view, "Password updated", Snackbar.LENGTH_SHORT).show()
+                            Snackbar.make(view, "password updated", Snackbar.LENGTH_SHORT).show()
                         } else {
                             Snackbar.make(
                                 view,
-                                "Password update failed: ${updateTask.exception?.message}",
+                                "password update failed: ${updateTask.exception?.message}",
                                 Snackbar.LENGTH_LONG
                             ).show()
                         }
@@ -233,116 +222,97 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
 
-        // Edit Currency (simple picker)
+        // edit currency (simple picker)
         btnEditCurrency.setOnClickListener { view ->
             val options = arrayOf("USD", "EUR", "PLN", "GBP")
             AlertDialog.Builder(this)
-                .setTitle("Select currency")
+                .setTitle("select currency")
                 .setItems(options) { _, which ->
                     val selected = options[which]
                     tvCurrency.text = selected
-
-                    // Make sure you're saving to the SAME SharedPreferences key
-                    val prefs = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
                     prefs.edit().putString("currency", selected).apply()
 
-                    Snackbar.make(view, "Currency updated", Snackbar.LENGTH_SHORT).show()
+                    // update firestore
+                    val user = auth.currentUser
+                    if (user != null) {
+                        db.collection("users")
+                            .document(user.uid)
+                            .update(
+                                mapOf(
+                                    "currency" to selected,
+                                    "updatedAt" to FieldValue.serverTimestamp()
+                                )
+                            )
+                    }
+
+                    Snackbar.make(view, "currency updated", Snackbar.LENGTH_SHORT).show()
                 }
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton("cancel", null)
                 .show()
         }
 
+        // load data
+        loadUserProfile()
+
         BottomMenuHelper.setupMenu(this, "profile")
-    }
-
-    private fun navigateToHome() {
-        val intent = Intent(this, HomeActivity::class.java)
-        // Clear the back stack so user can't go back to Profile with back button
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-        finish() // Finish current activity so it's removed from stack
-        overridePendingTransition(0, 0)
-    }
-
-    private fun updateUserNameInFirestore(newName: String, view: View) {
-        val user = auth.currentUser
-        if (user == null) {
-            Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        // Update UI immediately
-        tvName.text = newName
-
-        // Save to SharedPreferences for offline use
-        prefs.edit().putString("name", newName).apply()
-
-        // Save to Firestore
-        db.collection("users").document(user.uid)
-            .update("name", newName, "updatedAt", FieldValue.serverTimestamp())
-            .addOnSuccessListener {
-                Snackbar.make(view, "Name updated successfully!", Snackbar.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener { e ->
-                Snackbar.make(view, "Error updating name: ${e.message}", Snackbar.LENGTH_LONG)
-                    .show()
-            }
     }
 
     private fun loadUserProfile() {
         val user = auth.currentUser
 
-        // Name/Currency local
+        // name/currency local
         tvName.text = prefs.getString("name", "Maria Wozniak")
         tvCurrency.text = prefs.getString("currency", "USD")
 
-        // Email from Firebase if exists
-        tvEmail.text = user?.email ?: "No email"
+        // email from firebase
+        tvEmail.text = user?.email ?: "no email"
 
         tvPassword.text = "••••••••"
 
         val savedUri = prefs.getString("profile_photo_uri", null)
-        if (savedUri != null) {
+        if (!savedUri.isNullOrBlank()) {
             ivProfilePhoto.setImageURI(Uri.parse(savedUri))
+        } else {
+            ivProfilePhoto.setImageResource(R.drawable.generic_ava)
         }
     }
 
-    private fun confirmDeleteAccount(view: View) {
+    private fun confirmDeleteAccount(view: android.view.View) {
         val user = auth.currentUser
         if (user == null) {
-            Snackbar.make(view, "No user logged in", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(view, "no user logged in", Snackbar.LENGTH_SHORT).show()
             return
         }
 
         AlertDialog.Builder(this)
-            .setTitle("Delete account")
-            .setMessage("This action cannot be undone. Do you want to continue?")
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Delete") { _, _ ->
-                // Para borrar cuenta, re-auth reciente.
-                // Pedimos password actual.
+            .setTitle("delete account")
+            .setMessage("this action cannot be undone. do you want to continue?")
+            .setNegativeButton("cancel", null)
+            .setPositiveButton("delete") { _, _ ->
+                // to delete account, recent re-auth is required
+                // ask for current password
                 showTextEditDialog(
-                    title = "Confirm password",
+                    title = "confirm password",
                     initialValue = "",
                     inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD,
-                    hint = "Current password"
+                    hint = "current password"
                 ) { currentPassword ->
                     val email = user.email
                     if (email.isNullOrBlank()) {
-                        Snackbar.make(view, "Current email not found", Snackbar.LENGTH_SHORT).show()
+                        Snackbar.make(view, "current email not found", Snackbar.LENGTH_SHORT).show()
                         return@showTextEditDialog
                     }
 
                     val credential = EmailAuthProvider.getCredential(email, currentPassword)
                     user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
                         if (!reauthTask.isSuccessful) {
-                            Snackbar.make(view, "Wrong password", Snackbar.LENGTH_LONG).show()
+                            Snackbar.make(view, "wrong password", Snackbar.LENGTH_LONG).show()
                             return@addOnCompleteListener
                         }
 
                         user.delete().addOnCompleteListener { deleteTask ->
                             if (deleteTask.isSuccessful) {
-                                Snackbar.make(view, "Account deleted", Snackbar.LENGTH_SHORT).show()
+                                Snackbar.make(view, "account deleted", Snackbar.LENGTH_SHORT).show()
 
                                 val intent = Intent(
                                     this,
@@ -353,7 +323,7 @@ class ProfileActivity : AppCompatActivity() {
                             } else {
                                 Snackbar.make(
                                     view,
-                                    "Delete failed: ${deleteTask.exception?.message}",
+                                    "delete failed: ${deleteTask.exception?.message}",
                                     Snackbar.LENGTH_LONG
                                 ).show()
                             }
@@ -379,8 +349,8 @@ class ProfileActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(title)
             .setView(input)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Save") { _, _ ->
+            .setNegativeButton("cancel", null)
+            .setPositiveButton("save") { _, _ ->
                 onSave(input.text.toString().trim())
             }
             .show()
@@ -421,15 +391,13 @@ class ProfileActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle(title)
             .setView(layout)
-            .setNegativeButton("Cancel", null)
-            .setPositiveButton("Save") { _, _ ->
-                onSave(first.text.toString().trim(), second.text.toString().trim())
+            .setNegativeButton("cancel", null)
+            .setPositiveButton("save") { _, _ ->
+                onSave(
+                    first.text.toString().trim(),
+                    second.text.toString().trim()
+                )
             }
             .show()
-    }
-
-    // Optional: Override device back button to also go to Home
-    override fun onBackPressed() {
-        navigateToHome()
     }
 }
