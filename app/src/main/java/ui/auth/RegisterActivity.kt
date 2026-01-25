@@ -158,6 +158,8 @@ class RegisterActivity : AppCompatActivity() {
         // Crear objeto con los datos del usuario para PiggyBank
         val userData = hashMapOf(
             "email" to email,
+            "name" to "User",
+            "createdAt" to FieldValue.serverTimestamp(),
             "userId" to userId,
             "createdAt" to FieldValue.serverTimestamp(),
             "updatedAt" to FieldValue.serverTimestamp(),
