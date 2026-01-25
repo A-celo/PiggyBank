@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PiggyBank">
         <activity
+            android:name="ui.home.EditGoalDialog"
+            android:exported="false" />
+        <activity
             android:name="ui.home.CreateGoalDialog"
             android:exported="false" />
         <activity

@@ -4,10 +4,7 @@ import android.app.AlertDialog
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piggybank.R
@@ -16,6 +13,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class GoalAdapter(
     private val goalsList: MutableList<Goal>,
+    private val onGoalUpdated: () -> Unit,
     private val onGoalDeleted: () -> Unit
 ) : RecyclerView.Adapter<GoalAdapter.GoalViewHolder>() {
 
@@ -35,13 +33,14 @@ class GoalAdapter(
     override fun onBindViewHolder(holder: GoalViewHolder, position: Int) {
         val goal = goalsList[position]
 
+        // Mostrar datos
         holder.tvGoalName.text = goal.name
         holder.tvGoalProgress.text = "$${goal.savedAmount} / $${goal.targetAmount}"
         holder.progressBarGoal.progress =
-            if(goal.targetAmount != 0.0) ((goal.savedAmount / goal.targetAmount) * 100).toInt()
+            if (goal.targetAmount != 0.0) ((goal.savedAmount / goal.targetAmount) * 100).toInt()
             else 0
 
-        // DELETE
+        // ================= ELIMINAR =================
         holder.btnDeleteGoal.setOnClickListener {
             AlertDialog.Builder(holder.itemView.context)
                 .setTitle("Delete Goal")
@@ -53,12 +52,15 @@ class GoalAdapter(
                 .show()
         }
 
-        // EDIT
+        // ================= EDITAR =================
         holder.btnEditGoal.setOnClickListener {
-            val dialog = CreateGoalDialog()
-            dialog.goalToEdit = goal
-            dialog.onGoalSaved = { notifyItemChanged(position) }
-            dialog.show((holder.itemView.context as AppCompatActivity).supportFragmentManager, "EditGoalDialog")
+            val dialog = EditGoalDialog(goal) {
+                onGoalUpdated()
+            }
+            dialog.show(
+                (holder.itemView.context as AppCompatActivity).supportFragmentManager,
+                "EditGoalDialog"
+            )
         }
     }
 
@@ -68,11 +70,11 @@ class GoalAdapter(
             .addOnSuccessListener {
                 goalsList.removeAt(position)
                 notifyItemRemoved(position)
-                Toast.makeText(view.context,"Goal deleted!",Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "Goal deleted!", Toast.LENGTH_SHORT).show()
                 onGoalDeleted()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(view.context,"Error: ${e.message}",Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 

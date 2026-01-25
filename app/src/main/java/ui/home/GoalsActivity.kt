@@ -30,9 +30,14 @@ class GoalsActivity : AppCompatActivity() {
         btnCreateGoal = findViewById(R.id.btnCreateGoal)
 
         // SEGUNDO: Configurar el adapter
-        goalAdapter = GoalAdapter(goalsList) { }
+        goalAdapter = GoalAdapter(
+            goalsList,
+            onGoalUpdated = { listenGoalsFromFirebase() },
+            onGoalDeleted = { listenGoalsFromFirebase() }
+        )
         rvGoals.adapter = goalAdapter
         rvGoals.layoutManager = LinearLayoutManager(this)
+
 
         // TERCERO: Configurar listeners
         btnCreateGoal.setOnClickListener {

@@ -11,17 +11,16 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CreateGoalDialog : DialogFragment() {
+class EditGoalDialog(
+    private val goal: Goal,
+    private val onGoalUpdated: () -> Unit
+) : DialogFragment() {
 
     private lateinit var etGoalName: EditText
     private lateinit var spinnerCategory: Spinner
     private lateinit var etTargetAmount: EditText
+    private lateinit var etSavedAmount: EditText
     private lateinit var etCompletionDate: EditText
-    private lateinit var btnSave: Button
-    private lateinit var btnCancel: Button
-
-    var onGoalSaved: (() -> Unit)? = null
-    private var selectedDate: Date = Date()
 
     private val categories = arrayOf(
         "Food & Dining", "Transportation", "Shopping",
@@ -33,7 +32,7 @@ class CreateGoalDialog : DialogFragment() {
         super.onStart()
         dialog?.window?.let { window ->
             val params = window.attributes
-            params.width = (resources.displayMetrics.widthPixels * 0.9).toInt()  // 90% ancho
+            params.width = (resources.displayMetrics.widthPixels * 0.9).toInt()
             params.height = WindowManager.LayoutParams.WRAP_CONTENT
             window.attributes = params
         }
@@ -43,62 +42,54 @@ class CreateGoalDialog : DialogFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.dialog_create_goal, container, false)
+        val view = inflater.inflate(R.layout.dialog_edit_goal, container, false)
 
-        // Inicializar vistas
         etGoalName = view.findViewById(R.id.etGoalName)
         spinnerCategory = view.findViewById(R.id.spinnerCategory)
         etTargetAmount = view.findViewById(R.id.etTargetAmount)
+        etSavedAmount = view.findViewById(R.id.etSavedAmount)
         etCompletionDate = view.findViewById(R.id.etCompletionDate)
-        btnSave = view.findViewById(R.id.btnSave)
-        btnCancel = view.findViewById(R.id.btnCancel)
 
-        // Spinner
         spinnerCategory.adapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
             categories
         )
 
-        // Listeners
-        etCompletionDate.setOnClickListener { showDatePicker() }
-        btnCancel.setOnClickListener { dismiss() }
-        btnSave.setOnClickListener { saveGoal() }
+        // Pre-fill
+        etGoalName.setText(goal.name)
+        etTargetAmount.setText(goal.targetAmount.toString())
+        etSavedAmount.setText(goal.savedAmount.toString())
+        etCompletionDate.setText(goal.completionDate)
+
+        val categoryPosition = categories.indexOf(goal.category)
+        if (categoryPosition >= 0) {
+            spinnerCategory.setSelection(categoryPosition)
+        }
+
+        view.findViewById<Button>(R.id.btnSave).setOnClickListener { updateGoal() }
+        view.findViewById<Button>(R.id.btnCancel).setOnClickListener { dismiss() }
 
         return view
     }
 
-    private fun showDatePicker() {
-        val cal = Calendar.getInstance()
-        cal.time = selectedDate
-        DatePickerDialog(
-            requireContext(),
-            { _, y, m, d ->
-                cal.set(y, m, d)
-                selectedDate = cal.time
-                etCompletionDate.setText(
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(selectedDate)
-                )
-            },
-            cal.get(Calendar.YEAR),
-            cal.get(Calendar.MONTH),
-            cal.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }
-
-    private fun saveGoal() {
+    private fun updateGoal() {
         val name = etGoalName.text.toString().trim()
         val targetText = etTargetAmount.text.toString().trim()
+        val savedText = etSavedAmount.text.toString().trim()
         val date = etCompletionDate.text.toString().trim()
 
-        if (name.isEmpty() || targetText.isEmpty() || date.isEmpty()) {
+        // Validaciones
+        if (name.isEmpty() || targetText.isEmpty() || savedText.isEmpty() || date.isEmpty()) {
             Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
             return
         }
 
         val targetAmount = targetText.toDoubleOrNull()
-        if (targetAmount == null) {
-            Toast.makeText(requireContext(), "Enter a valid number for Target Amount", Toast.LENGTH_SHORT).show()
+        val savedAmount = savedText.toDoubleOrNull()
+
+        if (targetAmount == null || savedAmount == null) {
+            Toast.makeText(requireContext(), "Enter valid numbers", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -108,21 +99,22 @@ class CreateGoalDialog : DialogFragment() {
         // ✅ Cerrar el diálogo INMEDIATAMENTE
         dismiss()
 
-        // ✅ DESPUÉS guardar en Firebase
-        val goal = Goal(
-            name = name,
-            category = spinnerCategory.selectedItem.toString(),
-            targetAmount = targetAmount,
-            savedAmount = 0.0,
-            completionDate = date
-        )
-
+        // ✅ DESPUÉS actualizar en Firebase
         FirebaseFirestore.getInstance()
             .collection("goals")
-            .add(goal)
+            .document(goal.id!!)
+            .update(
+                mapOf(
+                    "name" to name,
+                    "category" to spinnerCategory.selectedItem.toString(),
+                    "targetAmount" to targetAmount,
+                    "savedAmount" to savedAmount,
+                    "completionDate" to date
+                )
+            )
             .addOnSuccessListener {
-                Toast.makeText(appContext, "Goal saved!", Toast.LENGTH_SHORT).show()
-                onGoalSaved?.invoke()
+                Toast.makeText(appContext, "Goal updated!", Toast.LENGTH_SHORT).show()
+                onGoalUpdated()  // Notifica a la activity
             }
             .addOnFailureListener { e ->
                 Toast.makeText(appContext, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
