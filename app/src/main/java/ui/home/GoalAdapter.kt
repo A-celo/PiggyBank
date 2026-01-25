@@ -8,6 +8,7 @@ import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.piggybank.R
 import com.example.piggybank.model.Goal
@@ -15,7 +16,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class GoalAdapter(
     private val goalsList: MutableList<Goal>,
-    private val onGoalDeleted: () -> Unit  // <-- AGREGAR ESTE PARÁMETRO
+    private val onGoalDeleted: () -> Unit
 ) : RecyclerView.Adapter<GoalAdapter.GoalViewHolder>() {
 
     inner class GoalViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -23,6 +24,7 @@ class GoalAdapter(
         val tvGoalProgress: TextView = itemView.findViewById(R.id.tvGoalProgress)
         val progressBarGoal: ProgressBar = itemView.findViewById(R.id.progressBarGoal)
         val btnDeleteGoal: ImageView = itemView.findViewById(R.id.btnDeleteGoal)
+        val btnEditGoal: ImageView = itemView.findViewById(R.id.btnEditGoal)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GoalViewHolder {
@@ -36,39 +38,43 @@ class GoalAdapter(
         holder.tvGoalName.text = goal.name
         holder.tvGoalProgress.text = "$${goal.savedAmount} / $${goal.targetAmount}"
         holder.progressBarGoal.progress =
-            if (goal.targetAmount != 0.0) ((goal.savedAmount / goal.targetAmount) * 100).toInt()
+            if(goal.targetAmount != 0.0) ((goal.savedAmount / goal.targetAmount) * 100).toInt()
             else 0
 
+        // DELETE
         holder.btnDeleteGoal.setOnClickListener {
-            val context = holder.itemView.context
-            AlertDialog.Builder(context)
+            AlertDialog.Builder(holder.itemView.context)
                 .setTitle("Delete Goal")
                 .setMessage("Are you sure you want to delete this goal?")
                 .setPositiveButton("Yes") { _, _ ->
-                    deleteGoalFromFirebase(goal, position, context)
+                    deleteGoal(goal, position, holder.itemView)
                 }
                 .setNegativeButton("No", null)
                 .show()
         }
+
+        // EDIT
+        holder.btnEditGoal.setOnClickListener {
+            val dialog = CreateGoalDialog()
+            dialog.goalToEdit = goal
+            dialog.onGoalSaved = { notifyItemChanged(position) }
+            dialog.show((holder.itemView.context as AppCompatActivity).supportFragmentManager, "EditGoalDialog")
+        }
     }
 
-    private fun deleteGoalFromFirebase(goal: Goal, position: Int, context: android.content.Context) {
+    private fun deleteGoal(goal: Goal, position: Int, view: View) {
         val db = FirebaseFirestore.getInstance()
-        db.collection("goals")
-            .document(goal.id ?: "")
-            .delete()
+        db.collection("goals").document(goal.id ?: "").delete()
             .addOnSuccessListener {
                 goalsList.removeAt(position)
                 notifyItemRemoved(position)
-                Toast.makeText(context, "Goal deleted successfully", Toast.LENGTH_SHORT).show()
-                onGoalDeleted()  // <-- LLAMAR AL CALLBACK PARA RECARGAR
+                Toast.makeText(view.context,"Goal deleted!",Toast.LENGTH_SHORT).show()
+                onGoalDeleted()
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Error deleting goal: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context,"Error: ${e.message}",Toast.LENGTH_SHORT).show()
             }
     }
 
     override fun getItemCount(): Int = goalsList.size
 }
-
-

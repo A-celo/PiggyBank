@@ -16,7 +16,11 @@ class CreateGoalDialog : DialogFragment() {
     private lateinit var etGoalName: EditText
     private lateinit var spinnerCategory: Spinner
     private lateinit var etTargetAmount: EditText
+    private lateinit var etSavedAmount: EditText
     private lateinit var etCompletionDate: EditText
+    private lateinit var btnSave: Button
+    private lateinit var btnCancel: Button
+    private lateinit var savedAmountLayout: View  // Para ocultar/mostrar el saved amount
 
     private val categories = arrayOf(
         "Food & Dining",
@@ -32,8 +36,8 @@ class CreateGoalDialog : DialogFragment() {
 
     private var selectedDate: Date = Date()
 
-    // Lambda opcional para avisar a la Activity que se guardó un goal
     var onGoalSaved: (() -> Unit)? = null
+    var goalToEdit: Goal? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,16 +48,43 @@ class CreateGoalDialog : DialogFragment() {
         etGoalName = view.findViewById(R.id.etGoalName)
         spinnerCategory = view.findViewById(R.id.spinnerCategory)
         etTargetAmount = view.findViewById(R.id.etTargetAmount)
+        etSavedAmount = view.findViewById(R.id.etSavedAmount)
         etCompletionDate = view.findViewById(R.id.etCompletionDate)
+        btnSave = view.findViewById(R.id.btnSave)
+        btnCancel = view.findViewById(R.id.btnCancel)
+
+        // Asume que tienes un layout contenedor para el saved amount
+        // Si no lo tienes, usa etSavedAmount directamente
+        savedAmountLayout = etSavedAmount // o usa etSavedAmount
 
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, categories)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerCategory.adapter = adapter
 
+        // Configurar según el modo (crear o editar)
+        goalToEdit?.let { goal ->
+            // MODO EDICIÓN - Mostrar saved amount
+            savedAmountLayout.visibility = View.VISIBLE
+            etGoalName.setText(goal.name)
+            etTargetAmount.setText(goal.targetAmount.toString())
+            etSavedAmount.setText(goal.savedAmount.toString())
+            etCompletionDate.setText(goal.completionDate)
+
+            val categoryPosition = categories.indexOf(goal.category)
+            if (categoryPosition >= 0) {
+                spinnerCategory.setSelection(categoryPosition)
+            }
+
+            btnSave.text = "Update"
+        } ?: run {
+            // MODO CREACIÓN - Ocultar saved amount
+            savedAmountLayout.visibility = View.GONE
+        }
+
         etCompletionDate.setOnClickListener { showDatePicker() }
 
-        view.findViewById<Button>(R.id.btnCancel).setOnClickListener { dismiss() }
-        view.findViewById<Button>(R.id.btnSave).setOnClickListener { saveGoal() }
+        btnCancel.setOnClickListener { dismiss() }
+        btnSave.setOnClickListener { saveGoalImmediateDismiss() }
 
         return view
     }
@@ -87,7 +118,7 @@ class CreateGoalDialog : DialogFragment() {
         ).show()
     }
 
-    private fun saveGoal() {
+    private fun saveGoalImmediateDismiss() {
         val name = etGoalName.text.toString().trim()
         val category = spinnerCategory.selectedItem.toString()
         val target = etTargetAmount.text.toString().trim()
@@ -105,25 +136,66 @@ class CreateGoalDialog : DialogFragment() {
             return
         }
 
-        val goal = Goal(
-            name = name,
-            category = category,
-            targetAmount = targetDouble,
-            completionDate = date
-        )
+        // Guardar referencia al contexto ANTES de cerrar el diálogo
+        val appContext = requireContext().applicationContext
 
-        val db = FirebaseFirestore.getInstance()
-        db.collection("goals")
-            .add(goal)
-            .addOnSuccessListener { docRef ->
-                // Guardar el ID generado
-                goal.id = docRef.id
-                Toast.makeText(requireContext(), "Goal saved successfully!", Toast.LENGTH_SHORT).show()
-                onGoalSaved?.invoke() // Avisar a la Activity
-                dismiss()
+        // Cerrar el diálogo de inmediato
+        dismiss()
+
+        if (goalToEdit != null) {
+            // MODO EDICIÓN - Validar y usar saved amount
+            val saved = etSavedAmount.text.toString().trim()
+
+            if (saved.isBlank()) {
+                Toast.makeText(appContext, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return
             }
-            .addOnFailureListener { e ->
-                Toast.makeText(requireContext(), "Error saving goal: ${e.message}", Toast.LENGTH_SHORT).show()
+
+            val savedDouble = try {
+                saved.toDouble()
+            } catch (e: NumberFormatException) {
+                Toast.makeText(appContext, "Enter a valid number for Saved Amount", Toast.LENGTH_SHORT).show()
+                return
             }
+
+            val updatedGoal = mapOf(
+                "name" to name,
+                "category" to category,
+                "targetAmount" to targetDouble,
+                "savedAmount" to savedDouble,
+                "completionDate" to date
+            )
+
+            FirebaseFirestore.getInstance().collection("goals")
+                .document(goalToEdit!!.id ?: "")
+                .update(updatedGoal)
+                .addOnSuccessListener {
+                    Toast.makeText(appContext, "Goal updated successfully!", Toast.LENGTH_SHORT).show()
+                    onGoalSaved?.invoke()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(appContext, "Error updating goal: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            // MODO CREACIÓN - No usar saved amount, usar 0.0 por defecto
+            val goal = Goal(
+                name = name,
+                category = category,
+                targetAmount = targetDouble,
+                savedAmount = 0.0,  // Valor por defecto
+                completionDate = date
+            )
+
+            FirebaseFirestore.getInstance().collection("goals")
+                .add(goal)
+                .addOnSuccessListener { docRef ->
+                    goal.id = docRef.id
+                    Toast.makeText(appContext, "Goal saved successfully!", Toast.LENGTH_SHORT).show()
+                    onGoalSaved?.invoke()
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(appContext, "Error saving goal: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
     }
 }

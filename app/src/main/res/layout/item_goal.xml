@@ -1,67 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="12dp"
-    android:background="@drawable/rectangle_2">
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    card_view:cardCornerRadius="16dp"
+    card_view:cardElevation="4dp"
+    android:background="@android:color/white">
 
-    <!-- Nombre del Goal -->
-    <TextView
-        android:id="@+id/tvGoalName"
-        android:layout_width="0dp"
+    <RelativeLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Trip to Paris"
-        android:textSize="20sp"
-        android:textColor="#4C4C4C"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnDeleteGoal"
-        android:ellipsize="end"
-        android:maxLines="1"/>
+        android:padding="16dp">
 
-    <!-- Cantidad / Meta -->
-    <TextView
-        android:id="@+id/tvGoalProgress"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="$1200 / $5000"
-        android:textSize="15sp"
-        android:textColor="#616161"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvGoalName"
-        app:layout_constraintEnd_toStartOf="@+id/btnDeleteGoal"
-        android:ellipsize="end"
-        android:maxLines="1"/>
+        <TextView
+            android:id="@+id/tvGoalName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Goal Name"
+            android:textSize="18sp"
+            android:textColor="#4C4C4C"
+            android:textStyle="bold"/>
 
-    <!-- Barra de progreso -->
-    <ProgressBar
-        android:id="@+id/progressBarGoal"
-        style="@android:style/Widget.ProgressBar.Horizontal"
-        android:layout_width="0dp"
-        android:layout_height="16dp"
-        android:progress="24"
-        android:max="100"
-        android:progressTint="#C7B8EA"
-        android:backgroundTint="#E0E0E0"
-        app:layout_constraintTop_toBottomOf="@id/tvGoalProgress"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/btnDeleteGoal"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <!-- Botón Editar (lapiz) -->
+        <ImageView
+            android:id="@+id/btnEditGoal"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/edit"
+            android:contentDescription="Edit"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="40dp"/>
 
-    <!-- Botón Borrar Goal -->
-    <ImageView
-        android:id="@+id/btnDeleteGoal"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:contentDescription="Delete Goal"
-        android:src="@android:drawable/ic_menu_delete"
-        app:tint="#FF0000"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        <!-- Botón Eliminar -->
+        <ImageView
+            android:id="@+id/btnDeleteGoal"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_delete"
+            android:contentDescription="Delete"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/tvGoalProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="$0 / $100"
+            android:textSize="14sp"
+            android:textColor="#4C4C4C"
+            android:layout_below="@id/tvGoalName"
+            android:layout_marginTop="8dp"/>
 
+        <ProgressBar
+            android:id="@+id/progressBarGoal"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:layout_below="@id/tvGoalProgress"
+            android:layout_marginTop="4dp"
+            android:progress="0"
+            android:max="100"
+            android:progressTint="#C7B8EA"
+            android:progressBackgroundTint="#E0E0E0"/>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

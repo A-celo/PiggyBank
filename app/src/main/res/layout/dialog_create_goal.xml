@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="16dp">
@@ -13,7 +14,7 @@
             android:id="@+id/tvDialogTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create a new goal"
+            android:text="Create Goal"
             android:textSize="24sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -39,6 +40,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Target Amount"
+            android:inputType="numberDecimal"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/etSavedAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Saved Amount (optional)"
             android:inputType="numberDecimal"
             android:background="@drawable/edittext_background"
             android:padding="12dp"
