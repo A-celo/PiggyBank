@@ -19,6 +19,7 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
 import java.util.*
 
 class InsightsActivity : AppCompatActivity() {
@@ -38,7 +39,7 @@ class InsightsActivity : AppCompatActivity() {
     private lateinit var tvSmartTip: TextView
     private lateinit var btnBack: ImageView
 
-    // Navigation (Ahora están en el XML principal)
+    // Navigation
     private lateinit var menuHome: LinearLayout
     private lateinit var menuAdd: LinearLayout
     private lateinit var menuInsights: LinearLayout
@@ -53,33 +54,29 @@ class InsightsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_insights)
 
-        // ===== Bind views =====
         initViews()
-
-        // ===== Setup listeners =====
         setupToggleListeners()
         setupNavigationListeners()
 
-        // Default state
         selectToggle(tvWeekly, "weekly")
-
-        // Load expenses from Firebase
         loadExpensesFromFirebase()
     }
 
+    override fun onResume() {
+        super.onResume()
+        setupNavigationListeners()
+    }
+
     private fun initViews() {
-        // Toggles
         tvWeekly = findViewById(R.id.tvWeekly)
         tvMonthly = findViewById(R.id.tvMonthly)
         tvYearly = findViewById(R.id.tvYearly)
 
-        // Chart and info
         chart = findViewById(R.id.lineChart)
         tvTopCategory = findViewById(R.id.tvTopCategoryValue)
         tvSmartTip = findViewById(R.id.tvSmartTipMessage)
         btnBack = findViewById(R.id.btnBack)
 
-        // Bottom navigation
         menuHome = findViewById(R.id.menuHome)
         menuAdd = findViewById(R.id.menuAdd)
         menuInsights = findViewById(R.id.menuInsights)
@@ -111,32 +108,30 @@ class InsightsActivity : AppCompatActivity() {
 
         menuHome.setOnClickListener {
             Log.d("InsightsActivity", "Home clicked")
-            finish() // Volver a Home
+            finish()
         }
 
         menuAdd.setOnClickListener {
             Log.d("InsightsActivity", "Add clicked")
-            // Descomenta cuando tengas AddExpenseActivity
-            // startActivity(Intent(this, AddExpenseActivity::class.java))
-            Toast.makeText(this, "Add expense - Coming soon", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Add clicked", Toast.LENGTH_SHORT).show()
+            //if trouble comment this line
+            startActivity(Intent(this, AddExpenseActivity::class.java))
+
+
         }
 
         menuInsights.setOnClickListener {
             Log.d("InsightsActivity", "Insights clicked (already here)")
-            Toast.makeText(this, "You're already in Insights", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Already in Insights", Toast.LENGTH_SHORT).show()
         }
 
         menuGoals.setOnClickListener {
             Log.d("InsightsActivity", "Goals clicked")
-            // Descomenta cuando tengas GoalsActivity
-            // startActivity(Intent(this, GoalsActivity::class.java))
             Toast.makeText(this, "Goals - Coming soon", Toast.LENGTH_SHORT).show()
         }
 
         menuProfile.setOnClickListener {
             Log.d("InsightsActivity", "Profile clicked")
-            // Descomenta cuando tengas ProfileActivity
-            // startActivity(Intent(this, ProfileActivity::class.java))
             Toast.makeText(this, "Profile - Coming soon", Toast.LENGTH_SHORT).show()
         }
     }
@@ -157,7 +152,6 @@ class InsightsActivity : AppCompatActivity() {
         if (userId == null) {
             Log.e("InsightsActivity", "User not logged in")
             Toast.makeText(this, "User not logged in", Toast.LENGTH_SHORT).show()
-            // Mostrar datos vacíos
             loadData()
             return
         }
@@ -172,7 +166,7 @@ class InsightsActivity : AppCompatActivity() {
 
                 allExpenses = documents.mapNotNull { doc ->
                     try {
-                        Expense(
+                        val expense = Expense(
                             id = doc.id,
                             amount = doc.getDouble("amount") ?: 0.0,
                             category = doc.getString("category") ?: "",
@@ -184,6 +178,12 @@ class InsightsActivity : AppCompatActivity() {
                             paymentMethod = doc.getString("paymentMethod") ?: "",
                             userId = doc.getString("userId") ?: ""
                         )
+
+                        val dateStr = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                            .format(Date(expense.getDateInMillis()))
+                        Log.d("InsightsActivity", "Expense: ${expense.amount} EUR - ${expense.category} - Date: $dateStr")
+
+                        expense
                     } catch (e: Exception) {
                         Log.e("InsightsActivity", "Error parsing expense: ${e.message}")
                         null
@@ -195,8 +195,7 @@ class InsightsActivity : AppCompatActivity() {
             }
             .addOnFailureListener { e ->
                 Log.e("InsightsActivity", "Error loading expenses: ${e.message}")
-                Toast.makeText(this, "Error loading expenses: ${e.message}", Toast.LENGTH_SHORT).show()
-                // Mostrar datos vacíos
+                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 loadData()
             }
     }
@@ -211,21 +210,29 @@ class InsightsActivity : AppCompatActivity() {
 
     private fun loadWeekly() {
         val calendar = Calendar.getInstance()
-        val currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
 
-        // Ajustar para que lunes sea el primer día
-        val daysFromMonday = if (currentDayOfWeek == Calendar.SUNDAY) 6 else currentDayOfWeek - 2
-        calendar.add(Calendar.DAY_OF_YEAR, -daysFromMonday)
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
         val weekStart = calendar.timeInMillis
-        val weekExpenses = allExpenses.filter { it.getDateInMillis() >= weekStart }
 
+
+        calendar.add(Calendar.DAY_OF_YEAR, 7)
+        val weekEnd = calendar.timeInMillis
+
+        val weekExpenses = allExpenses.filter { expense ->
+            val expenseDate = expense.getDateInMillis()
+            expenseDate >= weekStart && expenseDate < weekEnd
+        }
+
+        Log.d("InsightsActivity", "Week range: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(weekStart))} to ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(weekEnd))}")
         Log.d("InsightsActivity", "Weekly expenses: ${weekExpenses.size}")
 
-        // Agrupar por día de la semana
+        calendar.add(Calendar.DAY_OF_YEAR, -7)
+
         val dailyTotals = mutableMapOf<Int, Double>()
         weekExpenses.forEach { expense ->
             val cal = Calendar.getInstance()
@@ -241,6 +248,7 @@ class InsightsActivity : AppCompatActivity() {
                 else -> 0
             }
             dailyTotals[dayIndex] = (dailyTotals[dayIndex] ?: 0.0) + expense.amount
+            Log.d("InsightsActivity", "Day $dayIndex: ${expense.amount}")
         }
 
         val entries = (0..6).map { day ->
@@ -249,7 +257,6 @@ class InsightsActivity : AppCompatActivity() {
 
         val labels = listOf("M", "T", "W", "T", "F", "S", "S")
         setupChart(entries, labels)
-
         updateTopCategory(weekExpenses)
         updateSmartTip(weekExpenses)
     }
@@ -260,13 +267,21 @@ class InsightsActivity : AppCompatActivity() {
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
         val monthStart = calendar.timeInMillis
-        val monthExpenses = allExpenses.filter { it.getDateInMillis() >= monthStart }
 
+        calendar.add(Calendar.MONTH, 1)
+        val monthEnd = calendar.timeInMillis
+
+        val monthExpenses = allExpenses.filter { expense ->
+            val expenseDate = expense.getDateInMillis()
+            expenseDate >= monthStart && expenseDate < monthEnd
+        }
+
+        Log.d("InsightsActivity", "Month range: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(monthStart))} to ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(monthEnd))}")
         Log.d("InsightsActivity", "Monthly expenses: ${monthExpenses.size}")
 
-        // Agrupar por semana
         val weeklyTotals = mutableMapOf<Int, Double>()
         monthExpenses.forEach { expense ->
             val cal = Calendar.getInstance()
@@ -282,7 +297,6 @@ class InsightsActivity : AppCompatActivity() {
 
         val labels = listOf("W1", "W2", "W3", "W4", "W5")
         setupChart(entries, labels)
-
         updateTopCategory(monthExpenses)
         updateSmartTip(monthExpenses)
     }
@@ -294,13 +308,21 @@ class InsightsActivity : AppCompatActivity() {
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
         calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
 
         val yearStart = calendar.timeInMillis
-        val yearExpenses = allExpenses.filter { it.getDateInMillis() >= yearStart }
 
+        calendar.add(Calendar.YEAR, 1)
+        val yearEnd = calendar.timeInMillis
+
+        val yearExpenses = allExpenses.filter { expense ->
+            val expenseDate = expense.getDateInMillis()
+            expenseDate >= yearStart && expenseDate < yearEnd
+        }
+
+        Log.d("InsightsActivity", "Year range: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(yearStart))} to ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date(yearEnd))}")
         Log.d("InsightsActivity", "Yearly expenses: ${yearExpenses.size}")
 
-        // Agrupar por mes
         val monthlyTotals = mutableMapOf<Int, Double>()
         yearExpenses.forEach { expense ->
             val cal = Calendar.getInstance()
@@ -315,7 +337,6 @@ class InsightsActivity : AppCompatActivity() {
 
         val labels = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
         setupChart(entries, labels)
-
         updateTopCategory(yearExpenses)
         updateSmartTip(yearExpenses)
     }
@@ -354,9 +375,9 @@ class InsightsActivity : AppCompatActivity() {
             "transport", "transportation" -> "You'll save $percentage% if you take public transport"
             "food", "food & dining", "dining" -> "You can save more by cooking at home"
             "shopping" -> "Try waiting 24 hours before making purchases"
-            "entertainment" -> "Look for free entertainment options in your area"
+            "entertainment" -> "Look for free entertainment options"
             "education" -> "Plan education expenses ahead"
-            else -> "Your top spending is on $topCategory ($percentage% of total)"
+            else -> "Top spending: $topCategory ($percentage% of total)"
         }
 
         tvSmartTip.text = tip
@@ -375,7 +396,6 @@ class InsightsActivity : AppCompatActivity() {
         }
 
         chart.data = LineData(dataSet)
-
         chart.axisRight.isEnabled = false
         chart.legend.isEnabled = false
         chart.description.isEnabled = false
@@ -398,11 +418,7 @@ class InsightsActivity : AppCompatActivity() {
             valueFormatter = object : ValueFormatter() {
                 override fun getFormattedValue(value: Float): String {
                     val index = value.toInt()
-                    return if (index in labels.indices) {
-                        labels[index]
-                    } else {
-                        ""
-                    }
+                    return if (index in labels.indices) labels[index] else ""
                 }
             }
         }

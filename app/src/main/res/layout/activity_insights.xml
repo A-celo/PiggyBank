@@ -189,7 +189,7 @@
             android:textStyle="bold"/>
     </LinearLayout>
 
-    <!-- BOTTOM NAVIGATION (Directamente aquí) -->
+    <!-- BOTTOM NAVIGATION-->
     <LinearLayout
         android:id="@+id/bottomMenu"
         android:layout_width="0dp"
