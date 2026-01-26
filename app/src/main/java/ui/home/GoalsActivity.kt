@@ -1,6 +1,8 @@
 package com.example.piggybank.ui.home
 
+import android.content.Intent
 import android.os.Bundle
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +19,7 @@ class GoalsActivity : AppCompatActivity() {
 
     private lateinit var rvGoals: RecyclerView
     private lateinit var btnCreateGoal: MaterialButton
+    private lateinit var btnBack: ImageView // Add this line
     private val goalsList = mutableListOf<Goal>()
     private lateinit var goalAdapter: GoalAdapter
 
@@ -28,6 +31,7 @@ class GoalsActivity : AppCompatActivity() {
         // PRIMERO: Inicializar TODAS las vistas
         rvGoals = findViewById(R.id.rvGoals)
         btnCreateGoal = findViewById(R.id.btnCreateGoal)
+        btnBack = findViewById(R.id.btnBack) // Initialize back button
 
         // SEGUNDO: Configurar el adapter
         goalAdapter = GoalAdapter(
@@ -46,6 +50,11 @@ class GoalsActivity : AppCompatActivity() {
             dialog.show(supportFragmentManager, "CreateGoalDialog")
         }
 
+        // Add back button listener
+        btnBack.setOnClickListener {
+            navigateToHome()
+        }
+
         // CUARTO: Configurar window insets
         val content = findViewById<androidx.constraintlayout.widget.ConstraintLayout>(R.id.contentContainer)
         ViewCompat.setOnApplyWindowInsetsListener(content) { v, insets ->
@@ -59,6 +68,15 @@ class GoalsActivity : AppCompatActivity() {
 
         // SEXTO: Cargar datos
         listenGoalsFromFirebase()
+    }
+
+    private fun navigateToHome() {
+        val intent = Intent(this, HomeActivity::class.java)
+        // Clear the back stack so user can't go back to Goals with back button
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish() // Finish current activity so it's removed from stack
+        overridePendingTransition(0, 0)
     }
 
     private fun listenGoalsFromFirebase() {
@@ -82,8 +100,9 @@ class GoalsActivity : AppCompatActivity() {
                 }
             }
     }
+
+    // Optional: Override device back button to also go to Home
+    override fun onBackPressed() {
+        navigateToHome()
+    }
 }
-
-
-
-
