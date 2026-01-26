@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="#FAFAFA">
 
-    <!-- Header morado -->
+    <!-- HEADER -->
     <View
         android:id="@+id/headerBackground"
         android:layout_width="0dp"
@@ -16,7 +16,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Logo -->
     <ImageView
         android:id="@+id/logoPig"
         android:layout_width="75dp"
@@ -24,172 +23,116 @@
         android:layout_marginStart="22dp"
         android:layout_marginTop="9dp"
         android:src="@drawable/logopiggyhome"
-        android:contentDescription="@string/app_name"
-        android:scaleType="fitCenter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
-    <!-- Nombre de la app -->
     <TextView
         android:id="@+id/tvAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Piggy Bank"
         android:textSize="40sp"
-        android:textColor="#F5F5F5"
         android:textStyle="bold"
+        android:textColor="#FFFFFF"
         android:layout_marginEnd="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/headerBackground"
         app:layout_constraintBottom_toBottomOf="@id/headerBackground"/>
 
-    <!-- Bienvenida al usuario -->
+    <!-- WELCOME -->
     <TextView
         android:id="@+id/tvWelcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hi Maria!"
+        android:text="Hi!"
         android:textSize="36sp"
-        android:textColor="#3A3A3A"
         android:textStyle="bold"
+        android:textColor="#3A3A3A"
         android:layout_marginStart="23dp"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/headerBackground"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <!-- Gasto semanal -->
+    <!-- WEEKLY SPEND -->
     <TextView
         android:id="@+id/tvWeeklySpend"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="You've spent $120 this week."
-        android:textSize="24sp"
+        android:text="You've spent €0 in the last 7 days"
+        android:textSize="22sp"
         android:textColor="#3A3A3A"
-        android:layout_marginStart="22dp"
-        android:layout_marginEnd="22dp"
+        android:layout_marginHorizontal="22dp"
         android:layout_marginTop="14dp"
         app:layout_constraintTop_toBottomOf="@id/tvWelcome"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Dinero restante -->
-    <TextView
-        android:id="@+id/tvMoneyLeft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="$80 left"
-        android:textSize="24sp"
-        android:textColor="#525252"
-        android:layout_marginStart="22dp"
-        android:layout_marginTop="35dp"
-        app:layout_constraintTop_toBottomOf="@id/tvWeeklySpend"
-        app:layout_constraintStart_toStartOf="parent"/>
-
-    <!-- Barra de progreso del budget -->
-    <ProgressBar
-        android:id="@+id/progressBudget"
-        style="?android:attr/progressBarStyleHorizontal"
+    <!-- TOP CATEGORY PREVIEW -->
+    <LinearLayout
+        android:id="@+id/topCategoryCard"
         android:layout_width="0dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="31dp"
-        android:layout_marginEnd="31dp"
-        android:layout_marginTop="11dp"
-        android:progress="60"
-        android:progressTint="#76BE34"
-        android:progressBackgroundTint="#CAE7CF"
-        app:layout_constraintTop_toBottomOf="@id/tvMoneyLeft"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/rectangle_2"
+        android:padding="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tvWeeklySpend"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Goal -->
+        <TextView
+            android:id="@+id/tvTopCategoryHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top category this week: Food"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#000000"/>
+    </LinearLayout>
+
+    <!-- GOAL -->
     <TextView
         android:id="@+id/tvGoal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="$ 100 / 500 goal"
-        android:textSize="24sp"
+        android:text="$0 / $0"
+        android:textSize="22sp"
         android:textColor="#525252"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="37dp"
-        app:layout_constraintTop_toBottomOf="@id/progressBudget"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/topCategoryCard"
         app:layout_constraintStart_toStartOf="parent"/>
 
-    <!-- Barra de progreso del goal -->
     <ProgressBar
         android:id="@+id/progressGoal"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="0dp"
-        android:layout_height="20dp"
-        android:layout_marginStart="31dp"
-        android:layout_marginEnd="31dp"
-        android:layout_marginTop="13dp"
-        android:progress="20"
+        android:layout_height="18dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginHorizontal="24dp"
         android:progressTint="#E5A000"
         android:progressBackgroundTint="#FDDCA7"
         app:layout_constraintTop_toBottomOf="@id/tvGoal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Botón Add Expense -->
+    <!-- ADD EXPENSE -->
     <Button
         android:id="@+id/btnAddExpense"
         android:layout_width="313dp"
         android:layout_height="63dp"
         android:text="Add expense"
-        android:textColor="#F5FAFAFA"
-        android:textSize="32sp"
         android:textAllCaps="false"
+        android:textSize="28sp"
+        android:textColor="#FFFFFF"
         android:backgroundTint="#C7B8EA"
-        android:layout_marginTop="53dp"
+        android:layout_marginTop="40dp"
         app:layout_constraintTop_toBottomOf="@id/progressGoal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Gráfica circular (placeholder) -->
-    <View
-        android:id="@+id/chartPlaceholder"
-        android:layout_width="151dp"
-        android:layout_height="148dp"
-        android:background="#E8E0F5"
-        android:layout_marginTop="53dp"
-        app:layout_constraintTop_toBottomOf="@id/btnAddExpense"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Etiquetas de categorías -->
-    <LinearLayout
-        android:id="@+id/categoryLabels"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="40dp"
-        app:layout_constraintTop_toBottomOf="@id/chartPlaceholder"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bottomMenu">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Food"
-            android:textSize="24sp"
-            android:textColor="#525252"
-            android:gravity="start"/>
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Transport"
-            android:textSize="24sp"
-            android:textColor="#525252"
-            android:gravity="end"/>
-    </LinearLayout>
-
-    <!-- Bottom Navigation -->
+    <!-- BOTTOM MENU -->
     <LinearLayout
         android:id="@+id/bottomMenu"
         android:layout_width="0dp"
@@ -323,6 +266,5 @@
         </LinearLayout>
 
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
