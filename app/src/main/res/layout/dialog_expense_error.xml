@@ -49,7 +49,7 @@
         android:layout_below="@id/there_was_a"
         android:layout_marginTop="10dp"
         android:gravity="center"
-        android:text="Try to register again to start\nsaving!"
+        android:text="Try to add your expense again \nto keep saving!"
         android:textColor="#757575"
         android:textSize="20sp"
         android:letterSpacing="0.05"

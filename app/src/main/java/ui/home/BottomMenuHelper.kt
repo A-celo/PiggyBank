@@ -67,12 +67,16 @@ object BottomMenuHelper {
                 val intent = Intent(activity, HomeActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 activity.startActivity(intent)
+                activity.finish()
             }
         }
 
         menuAdd?.setOnClickListener {
             if (activity !is AddExpenseActivity) {
-                activity.startActivity(Intent(activity, AddExpenseActivity::class.java))
+                val intent = Intent(activity, AddExpenseActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+                activity.finish()
             }
         }
 
@@ -81,19 +85,25 @@ object BottomMenuHelper {
                 val intent = Intent(activity, InsightsActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 activity.startActivity(intent)
+                activity.finish()
             }
         }
 
-        // TODO: Agregar navegación para Goals y Profile cuando crees esas Activities
         menuGoals?.setOnClickListener {
-            // activity.startActivity(Intent(activity, GoalsActivity::class.java))
+            if (activity !is GoalsActivity) {
+                val intent = Intent(activity, GoalsActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+                activity.finish()
+            }
         }
 
         menuProfile?.setOnClickListener {
-            // activity.startActivity(Intent(activity, ProfileActivity::class.java))
+            if (activity !is ProfileActivity) {
+                val intent = Intent(activity, ProfileActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                activity.startActivity(intent)
+            }
         }
     }
 }
-
-
-
