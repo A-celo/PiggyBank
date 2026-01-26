@@ -127,7 +127,10 @@ class InsightsActivity : AppCompatActivity() {
 
         menuGoals.setOnClickListener {
             Log.d("InsightsActivity", "Goals clicked")
-            Toast.makeText(this, "Goals - Coming soon", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, GoalsActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish()
         }
 
         menuProfile.setOnClickListener {

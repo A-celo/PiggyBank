@@ -7,9 +7,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.piggybank.R
-import com.example.piggybank.ui.home.AddExpenseActivity
-import com.example.piggybank.ui.home.BottomMenuHelper
 import com.example.piggybank.model.Goal
+import com.example.piggybank.ui.home.AddExpenseActivity
 import com.example.piggybank.utils.CurrencyHelper
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -23,20 +22,22 @@ class HomeActivity : AppCompatActivity() {
 
     private lateinit var tvWelcome: TextView
     private lateinit var tvWeeklySpend: TextView
+    private lateinit var tvTopCategory: TextView
     private lateinit var tvGoal: TextView
     private lateinit var progressGoal: ProgressBar
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
 
-        // ✅ Firebase SIN KTX
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // Views
         tvWelcome = findViewById(R.id.tvWelcome)
         tvWeeklySpend = findViewById(R.id.tvWeeklySpend)
+        tvTopCategory = findViewById(R.id.tvTopCategoryHome)
         tvGoal = findViewById(R.id.tvGoal)
         progressGoal = findViewById(R.id.progressGoal)
 
@@ -45,7 +46,6 @@ class HomeActivity : AppCompatActivity() {
         }
 
         BottomMenuHelper.setupMenu(this, "home")
-
         loadUserData()
     }
 
@@ -60,6 +60,7 @@ class HomeActivity : AppCompatActivity() {
         if (user == null) {
             tvWelcome.text = "Hi Guest!"
             tvWeeklySpend.text = "Sign in to track your expenses"
+            tvTopCategory.text = "No data yet"
             tvGoal.text = "No goals yet"
             progressGoal.progress = 0
             return
@@ -84,21 +85,34 @@ class HomeActivity : AppCompatActivity() {
             .whereGreaterThanOrEqualTo("date", sevenDaysAgo)
             .whereLessThanOrEqualTo("date", now)
             .get()
-            .addOnSuccessListener { querySnapshot ->
-                var total = 0.0
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.isEmpty) {
+                    tvWeeklySpend.text = "No expenses in the last 7 days"
+                    tvTopCategory.text = "No category data yet"
+                    return@addOnSuccessListener
+                }
 
-                for (document in querySnapshot.documents) {
-                    total += document.getDouble("amount") ?: 0.0
+                var total = 0.0
+                val categoryTotals = mutableMapOf<String, Double>()
+
+                for (doc in snapshot.documents) {
+                    val amount = doc.getDouble("amount") ?: 0.0
+                    val category = doc.getString("category") ?: "Other"
+
+                    total += amount
+                    categoryTotals[category] =
+                        categoryTotals.getOrDefault(category, 0.0) + amount
                 }
 
                 val formattedAmount = CurrencyHelper.formatAmount(this, total)
+                tvWeeklySpend.text =
+                    "You've spent $formattedAmount in the last 7 days"
 
-                if (querySnapshot.isEmpty) {
-                    tvWeeklySpend.text = "No expenses in the last 7 days"
-                } else {
-                    tvWeeklySpend.text =
-                        "You've spent $formattedAmount in the last 7 days"
-                }
+                val topCategory =
+                    categoryTotals.maxByOrNull { it.value }?.key ?: "Other"
+
+                tvTopCategory.text =
+                    "Top category this week: $topCategory"
             }
     }
 
@@ -133,17 +147,18 @@ class HomeActivity : AppCompatActivity() {
                 }
 
                 if (closestGoal != null) {
-                    tvGoal.text =
-                        "$${closestGoal.savedAmount} / $${closestGoal.targetAmount}"
+                    val saved = CurrencyHelper.formatAmount(this, closestGoal.savedAmount)
+                    val target = CurrencyHelper.formatAmount(this, closestGoal.targetAmount)
+
+                    tvGoal.text = "$saved / $target"
 
                     progressGoal.progress =
                         if (closestGoal.targetAmount > 0)
                             ((closestGoal.savedAmount / closestGoal.targetAmount) * 100).toInt()
                         else 0
-                } else {
-                    tvGoal.text = "No goals yet"
-                    progressGoal.progress = 0
                 }
             }
     }
+
+
 }
