@@ -6,5 +6,7 @@ data class Goal(
     var targetAmount: Double = 0.0,
     var completionDate: String = "",
     var savedAmount: Double = 0.0,
-    var id: String? = null
+    var id: String? = null,
+    var userId: String = ""
 )
+

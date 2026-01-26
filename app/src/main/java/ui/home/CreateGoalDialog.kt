@@ -10,6 +10,8 @@ import com.example.piggybank.model.Goal
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.*
+import com.google.firebase.auth.FirebaseAuth
+
 
 class CreateGoalDialog : DialogFragment() {
 
@@ -102,19 +104,17 @@ class CreateGoalDialog : DialogFragment() {
             return
         }
 
-        // ✅ Guardar referencia al contexto ANTES de cerrar
         val appContext = requireContext().applicationContext
-
-        // ✅ Cerrar el diálogo INMEDIATAMENTE
         dismiss()
 
-        // ✅ DESPUÉS guardar en Firebase
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
         val goal = Goal(
             name = name,
             category = spinnerCategory.selectedItem.toString(),
             targetAmount = targetAmount,
             savedAmount = 0.0,
-            completionDate = date
+            completionDate = date,
+            userId = userId ?: ""
         )
 
         FirebaseFirestore.getInstance()
